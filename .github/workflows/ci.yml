@@ -65,7 +65,7 @@ jobs:
         with:
           platform: x86
       - name: Build
-        run: cargo build --target ${{ matrix.target }} --release --locked --verbose
+        run: cargo build --target ${{ matrix.target }} --release --locked
       - name: Move
         run: mv target/${{ matrix.target }}/release/geph4-client.exe ./
       - name: Artifacts
@@ -125,10 +125,10 @@ jobs:
           # export RUSTFLAGS="-C link-arg=-lgcc -Clink-arg=-static-libgcc"
       - name: Build
         if: matrix.use-cross == false
-        run: cargo build --target ${{ matrix.target }} --release --locked --verbose
+        run: cargo build --target ${{ matrix.target }} --release --locked
       - name: Build cross
         if: matrix.use-cross == true
-        run: cross build --target ${{ matrix.target }} --release --locked --verbose
+        run: cross build --target ${{ matrix.target }} --release --locked
       - name: Move
         run: mv target/${{ matrix.target }}/release/geph4-client ./
       - name: Artifacts
