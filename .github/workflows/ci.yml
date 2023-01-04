@@ -42,7 +42,8 @@ jobs:
   build-windows:
     name: build-windows-${{ matrix.target }}
     runs-on: windows-latest
-    if: inputs.target == matrix.target || inputs.target == null
+    if: inputs.target == matrix.target ||
+      inputs.target == null
     strategy:
       matrix:
         target:
@@ -85,7 +86,8 @@ jobs:
   build-linux:
     name: build-linux-${{ matrix.target }}
     runs-on: ubuntu-latest
-    if: inputs.target == matrix.target || inputs.target == null
+    if: inputs.target == matrix.target ||
+      inputs.target == null
     strategy:
       matrix:
         target:
