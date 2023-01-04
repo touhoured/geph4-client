@@ -5,13 +5,11 @@ on:
     - cron: "0 6 * * 3"
   workflow_dispatch:
     inputs:
-      sync:
-        description: "Disable sync"
+      skip_sync:
+        description: "Skip sync"
         required: false
+        default: true
         type: boolean
-      target:
-        description: "Target"
-        required: false
 
 env:
   CARGO_TERM_COLOR: always
@@ -20,7 +18,7 @@ jobs:
   sync:
     name: Sync
     runs-on: ubuntu-latest
-    if: inputs.sync != true
+    if: inputs.skip_sync != true
     steps:
       - uses: actions/checkout@v3
         with:
@@ -42,7 +40,6 @@ jobs:
   build-windows:
     name: build-windows-${{ matrix.target }}
     runs-on: windows-latest
-    if: ${{ inputs.target == 'true' || inputs.target == null }}
     strategy:
       matrix:
         target:
@@ -60,8 +57,13 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+      -
 #       - name: Cache
 #         uses: Swatinem/rust-cache@v1
+      - name: Fix MinGW
+        if: matrix.target == 'i686-pc-windows-gnu'
+        uses: kzrnm/fix-mingw@v1
+
       - name: Build
         run: cargo build --target ${{ matrix.target }} --release --locked --verbose
       - name: Move
@@ -85,7 +87,6 @@ jobs:
   build-linux:
     name: build-linux-${{ matrix.target }}
     runs-on: ubuntu-latest
-    if: ${{ inputs.target == 'true' || inputs.target == null }}
     strategy:
       matrix:
         target:
