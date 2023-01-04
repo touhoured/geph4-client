@@ -95,9 +95,9 @@ jobs:
             use-cross: true
           - target: aarch64-linux-android
             use-cross: true
-          - target: i686-pc-windows-gnu
-            use-cross: true
-            bin: geph4-client.exe
+#           - target: i686-pc-windows-gnu
+#             use-cross: true
+#             bin: geph4-client.exe
     steps:
       - name: Checkout
         uses: actions/checkout@v3
