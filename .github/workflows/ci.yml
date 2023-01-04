@@ -88,7 +88,8 @@ jobs:
           - x86_64-unknown-linux-musl
           - aarch64-unknown-linux-musl
           - aarch64-linux-android
-        bin: geph4-client
+        bin:
+          - geph4-client
         include:
           - target: aarch64-unknown-linux-musl
             use-cross: true
