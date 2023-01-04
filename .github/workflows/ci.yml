@@ -44,7 +44,6 @@ jobs:
       matrix:
         target:
           - i686-pc-windows-msvc
-          - i686-pc-windows-gnu
         # include:
         #   - target: i686-pc-windows-gnu
         #     use-cross: true
@@ -59,11 +58,6 @@ jobs:
           targets: ${{ matrix.target }}
 #       - name: Cache
 #         uses: Swatinem/rust-cache@v1
-      - name: Set up MinGW
-        if: matrix.target == 'i686-pc-windows-gnu'
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x86
       - name: Build
         run: cargo build --target ${{ matrix.target }} --release --locked
       - name: Move
@@ -94,11 +88,15 @@ jobs:
           - x86_64-unknown-linux-musl
           - aarch64-unknown-linux-musl
           - aarch64-linux-android
+        bin: geph4-client
         include:
           - target: aarch64-unknown-linux-musl
             use-cross: true
           - target: aarch64-linux-android
             use-cross: true
+          - target: i686-pc-windows-gnu
+            use-cross: true
+            bin: geph4-client.exe
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -113,9 +111,6 @@ jobs:
         uses: taiki-e/install-action@cross
 #       - name: Cache
 #         uses: Swatinem/rust-cache@v1
-#       - name: Set Android NDK linker path [Android (aarch64)]
-#         if: ${{ matrix.target == 'aarch64-linux-android' }}
-#         run: echo "$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_PATH
       - name: Install musl-gcc
         if: matrix.target == 'x86_64-unknown-linux-musl' ||
           matrix.target == 'aarch64-unknown-linux-musl'
@@ -124,20 +119,22 @@ jobs:
           # sudo apt install libssl-dev pkg-config
           # export RUSTFLAGS="-C link-arg=-lgcc -Clink-arg=-static-libgcc"
       - name: Build
-        if: matrix.use-cross == false
-        run: cargo build --target ${{ matrix.target }} --release --locked
-      - name: Build cross
-        if: matrix.use-cross == true
-        run: cross build --target ${{ matrix.target }} --release --locked
+        run: |
+          if [ ${{ matrix.use-cross }} = true ]; then
+            bin=cross
+          else
+            bin=cargo
+          fi
+        $bin build --target ${{ matrix.target }} --release --locked
       - name: Move
-        run: mv target/${{ matrix.target }}/release/geph4-client ./
+        run: mv target/${{ matrix.target }}/release/${{ matrix.bin }} ./
       - name: Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.target }}
           path: geph4-client
       - name: Package
-        run: tar -czvf geph4-client-${{ matrix.target }}.tar.gz geph4-client
+        run: 7z a geph4-client-${{ matrix.target }}.7z ${{ matrix.bin }}
       - name: Get tag
         id: tag
         uses: JinoArch/get-latest-tag@latest
@@ -145,4 +142,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.tag.outputs.latestTag }}
-          files: geph4-client-${{ matrix.target }}.tar.gz
+          files: geph4-client-${{ matrix.target }}.7z
