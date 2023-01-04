@@ -125,7 +125,7 @@ jobs:
           else
             bin=cargo
           fi
-        $bin build --target ${{ matrix.target }} --release --locked
+          $bin build --target ${{ matrix.target }} --release --locked
       - name: Move
         run: mv target/${{ matrix.target }}/release/${{ matrix.bin }} ./
       - name: Artifacts
