@@ -59,9 +59,11 @@ jobs:
           targets: ${{ matrix.target }}
 #       - name: Cache
 #         uses: Swatinem/rust-cache@v1
-      - name: Fix MinGW
+      - name: Set up MinGW
         if: matrix.target == 'i686-pc-windows-gnu'
-        uses: kzrnm/fix-mingw@v1
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x86
       - name: Build
         run: cargo build --target ${{ matrix.target }} --release --locked --verbose
       - name: Move
