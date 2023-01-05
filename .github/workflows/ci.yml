@@ -32,10 +32,10 @@ jobs:
           upstream_repo: geph-official/geph4-client
           myBranch: master
         run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git clone https://github.com/$upstream_repo.git upstream_repo
           cd upstream_repo
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git remote add myRepo https://github.com/${{ github.repository }}.git
           hash=$(git log --all --pretty=format:'%H' -n 1)
           git reset --hard $hash
