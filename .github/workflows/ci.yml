@@ -10,7 +10,11 @@ on:
         required: false
         default: true
         type: boolean
-
+      skip_build:
+        description: "Skip build"
+        required: false
+        default: false
+        type: boolean
 env:
   CARGO_TERM_COLOR: always
 
@@ -28,20 +32,19 @@ jobs:
           upstream_repo: geph-official/geph4-client
           myBranch: master
         run: |
-          # git config user.name github-actions[bot]
-          # git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+
           git clone --depth 1 https://github.com/$upstream_repo.git upstream_repo
           cd upstream_repo
+          git remote set-url origin https://github.com/${{ github.repository }}.git
           hash=$(git log --all --pretty=format:'%H' -n 1)
           git reset --hard $hash
-          git push https://github.com/${{ github.repository }}.git $myBranch
-          git push --tags https://github.com/${{ github.repository }}.git $myBranch
-      - name: Clone MagiskOnWSALocal source code
-        run: |
+          git push $myBranch
+          git push --tags $myBranch
 
   build-windows:
     name: build-windows-${{ matrix.target }}
     runs-on: windows-latest
+    if: inputs.skip_build != true
     strategy:
       matrix:
         target:
@@ -70,7 +73,7 @@ jobs:
           name: ${{ matrix.target }}
           path: geph4-client.exe
       - name: Package
-        run: 7z a geph4-client-${{ matrix.target }}.zip geph4-client.exe
+        run: 7z a geph4-client-${{ matrix.target }}.7z geph4-client.exe
       - name: Get tag
         id: tag
         uses: JinoArch/get-latest-tag@latest
@@ -78,11 +81,12 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.tag.outputs.latestTag }}
-          files: geph4-client-${{ matrix.target }}.zip
+          files: geph4-client-${{ matrix.target }}.7z
 
   build-linux:
     name: build-linux-${{ matrix.target }}
     runs-on: ubuntu-latest
+    if: inputs.skip_build != true
     strategy:
       matrix:
         target:
