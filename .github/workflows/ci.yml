@@ -32,14 +32,14 @@ jobs:
           upstream_repo: geph-official/geph4-client
           myBranch: master
         run: |
-
-          git clone --depth 1 https://github.com/$upstream_repo.git upstream_repo
+          git clone https://github.com/$upstream_repo.git upstream_repo
           cd upstream_repo
           git remote set-url origin https://github.com/${{ github.repository }}.git
           hash=$(git log --all --pretty=format:'%H' -n 1)
+          
           git reset --hard $hash
-          git push $myBranch
-          git push --tags $myBranch
+          git push
+          git push --tags
 
   build-windows:
     name: build-windows-${{ matrix.target }}
