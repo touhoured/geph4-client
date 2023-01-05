@@ -15,8 +15,8 @@ on:
         required: false
         default: false
         type: boolean
-      ref:
-        description: "set ref"
+      reset_sha:
+        description: "Reset to sha"
         required: false
         type: string
 env:
@@ -124,8 +124,8 @@ jobs:
       - name: Reset latest tag
         run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to input ref
-        if: inputs.ref != null
-        run: git reset --hard ${{ inputs.ref }}
+        if: inputs.reset_sha != null
+        run: git reset --hard ${{ inputs.reset_sha }}
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
