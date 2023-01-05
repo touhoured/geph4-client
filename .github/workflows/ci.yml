@@ -117,17 +117,13 @@ jobs:
             bin: geph4-client.exe
     steps:
       - name: Checkout
-        if: inputs.ref == null
         uses: actions/checkout@v3
         with:
           repository: geph-official/geph4-client
           ref: master
-      - name: Checkout custom
+      - name: set ref
         if: inputs.ref != null
-        uses: actions/checkout@v3
-        with:
-          repository: geph-official/geph4-client
-          ref: ${{ inputs.ref}}
+        run: git reset --HEAD ${{ inputs.ref }}
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
