@@ -19,70 +19,78 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  sync:
-    name: Sync
-    runs-on: ubuntu-latest
-    if: inputs.skip_sync != true
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: master
-      - name: Sync
-        env:
-          upstream_repo: geph-official/geph4-client
-        run: |
-          git remote add upstream https://github.com/$upstream_repo.git
-          git fetch upstream
-          hash=$(git log --all --pretty=format:'%H' -n 1)
-          git reset --hard $hash
-          git push
-          git push --tags
+#   sync:
+#     name: Sync
+#     runs-on: ubuntu-latest
+#     if: inputs.skip_sync != true
+#     steps:
+#       - uses: actions/checkout@v3
+#         with:
+#           ref: master
+#       - name: Sync
+#         env:
+#           upstream_repo: geph-official/geph4-client
+#         run: |
+#           git remote add upstream https://github.com/$upstream_repo.git
+#           git fetch upstream
+#           hash=$(git log --all --pretty=format:'%H' -n 1)
+#           git reset --hard $hash
+#           git push
+#           git push --tags
 
-  build-windows:
-    name: build-windows-${{ matrix.target }}
-    runs-on: windows-latest
-    if: inputs.skip_build != true
-    strategy:
-      matrix:
-        target:
-          - i686-pc-windows-msvc
-        # include:
-        #   - target: i686-pc-windows-gnu
-        #     use-cross: true
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          ref: master
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
-#       - name: Cache
-#         uses: Swatinem/rust-cache@v1
-      - name: Build
-        run: cargo build --target ${{ matrix.target }} --release --locked
-      - name: Move
-        run: mv target/${{ matrix.target }}/release/geph4-client.exe ./
-      - name: Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.target }}
-          path: geph4-client.exe
-      - name: Package
-        run: 7z a geph4-client-${{ matrix.target }}.7z geph4-client.exe
-      - name: Get tag
-        id: tag
-        uses: JinoArch/get-latest-tag@latest
-      - name: Releases
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.tag.outputs.latestTag }}
-          files: geph4-client-${{ matrix.target }}.7z
+#   build-windows:
+#     name: build-windows-${{ matrix.target }}
+#     runs-on: windows-latest
+#     if: inputs.skip_build != true
+#     strategy:
+#       matrix:
+#         target:
+#           - i686-pc-windows-msvc
+#         # include:
+#         #   - target: i686-pc-windows-gnu
+#         #     use-cross: true
+#     steps:
+#       - name: Checkout
+#         if: inputs.ref == null
+#         uses: actions/checkout@v3
+#         with:
+#           repository: geph-official/geph4-client
+#           ref: master
+#       - name: Checkout custom
+#         if: inputs.ref != null
+#         uses: actions/checkout@v3
+#         with:
+#           repository: geph-official/geph4-client
+#           ref: ${{ inputs.ref}}
+#       - name: Install Rust
+#         uses: dtolnay/rust-toolchain@stable
+#         with:
+#           targets: ${{ matrix.target }}
+# #       - name: Cache
+# #         uses: Swatinem/rust-cache@v1
+#       - name: Build
+#         run: cargo build --target ${{ matrix.target }} --release --locked
+#       - name: Move
+#         run: mv target/${{ matrix.target }}/release/geph4-client.exe ./
+#       - name: Artifacts
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: ${{ matrix.target }}
+#           path: geph4-client.exe
+#       - name: Package
+#         run: 7z a geph4-client-${{ matrix.target }}.7z geph4-client.exe
+#       - name: Get tag
+#         id: tag
+#         uses: JinoArch/get-latest-tag@latest
+#       - name: Releases
+#         uses: softprops/action-gh-release@v1
+#         with:
+#           tag_name: ${{ steps.tag.outputs.latestTag }}
+#           files: geph4-client-${{ matrix.target }}.7z
 
   build-linux:
     name: build-linux-${{ matrix.target }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     if: inputs.skip_build != true
     strategy:
       matrix:
@@ -91,6 +99,8 @@ jobs:
           - x86_64-unknown-linux-musl
           - aarch64-unknown-linux-musl
           - aarch64-linux-android
+        os:
+          - ubuntu-latest
         bin:
           - geph4-client
         include:
@@ -98,14 +108,22 @@ jobs:
             use-cross: true
           - target: aarch64-linux-android
             use-cross: true
-#           - target: i686-pc-windows-gnu
-#             use-cross: true
-#             bin: geph4-client.exe
+          - target: i686-pc-windows-msvc
+            os: windows-latest
+            bin: geph4-client.exe
     steps:
       - name: Checkout
+        if: inputs.ref == null
         uses: actions/checkout@v3
         with:
+          repository: geph-official/geph4-client
           ref: master
+      - name: Checkout custom
+        if: inputs.ref != null
+        uses: actions/checkout@v3
+        with:
+          repository: geph-official/geph4-client
+          ref: ${{ inputs.ref}}
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -116,20 +134,19 @@ jobs:
 #       - name: Cache
 #         uses: Swatinem/rust-cache@v1
       - name: Install musl-gcc
-        if: matrix.target == 'x86_64-unknown-linux-musl' ||
+        if: |
+          matrix.target == 'x86_64-unknown-linux-musl' ||
           matrix.target == 'aarch64-unknown-linux-musl'
         run: |
           sudo apt install musl-tools
           # sudo apt install libssl-dev pkg-config
           # export RUSTFLAGS="-C link-arg=-lgcc -Clink-arg=-static-libgcc"
-      - name: Build
-        run: |
-          if [ ${{ matrix.use-cross }} = true ]; then
-            bin=cross
-          else
-            bin=cargo
-          fi
-          $bin build --target ${{ matrix.target }} --release --locked
+      - name: Cargo build
+        if: matrix.use-cross != true
+        run: cargo build --target ${{ matrix.target }} --release --locked
+      - name: Cross build
+        if: matrix.use-cross == true
+        run: cross build --target ${{ matrix.target }} --release --locked
       - name: Move
         run: mv target/${{ matrix.target }}/release/${{ matrix.bin }} ./
       - name: Artifacts
