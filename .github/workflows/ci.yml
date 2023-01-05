@@ -136,7 +136,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.target }}
-          path: geph4-client
+          path: ${{ matrix.bin }}
       - name: Package
         run: 7z a geph4-client-${{ matrix.target }}.7z ${{ matrix.bin }}
       - name: Get tag
