@@ -20,22 +20,24 @@ jobs:
     runs-on: ubuntu-latest
     if: inputs.skip_sync != true
     steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: master
+#       - uses: actions/checkout@v3
+#         with:
+#           ref: master
       - name: Sync
         env:
           upstream_repo: geph-official/geph4-client
+          myBranch: master
         run: |
           # git config user.name github-actions[bot]
           # git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git remote add upstream https://github.com/$upstream_repo.git
-          git fetch upstream
+          git clone --depth 1 https://github.com/$upstream_repo.git upstream_repo
+          cd upstream_repo
           hash=$(git log --all --pretty=format:'%H' -n 1)
           git reset --hard $hash
-          # git tag --contains $hash
-          git push
-          git push --tags
+          git push https://github.com/${{ github.repository }}.git $myBranch
+          git push --tags https://github.com/${{ github.repository }}.git $myBranch
+      - name: Clone MagiskOnWSALocal source code
+        run: |
 
   build-windows:
     name: build-windows-${{ matrix.target }}
