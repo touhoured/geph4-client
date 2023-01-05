@@ -5,11 +5,11 @@ on:
     - cron: "0 6 * * 3"
   workflow_dispatch:
     inputs:
-      skip_sync:
-        description: "Skip sync"
-        required: false
-        default: true
-        type: boolean
+#       skip_sync:
+#         description: "Skip sync"
+#         required: false
+#         default: true
+#         type: boolean
       skip_build:
         description: "Skip build"
         required: false
