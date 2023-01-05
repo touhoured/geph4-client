@@ -34,12 +34,13 @@ jobs:
         run: |
           git clone https://github.com/$upstream_repo.git upstream_repo
           cd upstream_repo
-          git remote set-url origin https://github.com/${{ github.repository }}.git
+          git remote add myRepo https://github.com/${{ github.repository }}.git
           hash=$(git log --all --pretty=format:'%H' -n 1)
-          
+          current_branch=$(git branch --show-current)
           git reset --hard $hash
-          git push
-          git push --tags
+          git branch
+          git push myRepo $current_branch:$myBranch
+          git push --tags myRepo $current_branch:$myBranch
 
   build-windows:
     name: build-windows-${{ matrix.target }}
