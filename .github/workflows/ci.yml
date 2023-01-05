@@ -38,9 +38,9 @@ jobs:
           hash=$(git log --all --pretty=format:'%H' -n 1)
           current_branch=$(git branch --show-current)
           git reset --hard $hash
-          git branch
-          git push myRepo $current_branch:$myBranch
-          git push --tags myRepo $current_branch:$myBranch
+          git remote -v
+          echo git push myRepo $current_branch:$myBranch
+          echo git push --tags myRepo $current_branch:$myBranch
 
   build-windows:
     name: build-windows-${{ matrix.target }}
