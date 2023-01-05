@@ -122,10 +122,10 @@ jobs:
           repository: geph-official/geph4-client
           ref: master
       - name: Reset latest tag
-        run: git reset --HEAD $(git rev-list --all --max-count=1)
+        run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to input ref
         if: inputs.ref != null
-        run: git reset --HEAD ${{ inputs.ref }}
+        run: git reset --hard ${{ inputs.ref }}
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
