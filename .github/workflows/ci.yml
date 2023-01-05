@@ -159,6 +159,7 @@ jobs:
       - name: Package
         run: 7z a geph4-client-${{ matrix.target }}.7z ${{ matrix.bin }}
       - name: Get tag
+        shell: bash
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
         uses: softprops/action-gh-release@v1
