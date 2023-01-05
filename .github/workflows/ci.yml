@@ -159,10 +159,9 @@ jobs:
       - name: Package
         run: 7z a geph4-client-${{ matrix.target }}.7z ${{ matrix.bin }}
       - name: Get tag
-        id: tag
-        uses: JinoArch/get-latest-tag@latest
+        run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.tag.outputs.latestTag }}
+          tag_name: ${{ env.tag }}
           files: geph4-client-${{ matrix.target }}.7z
