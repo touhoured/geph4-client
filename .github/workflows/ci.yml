@@ -94,7 +94,7 @@ jobs:
 #           files: geph4-client-${{ matrix.target }}.7z
 
   build-linux:
-    name: build-linux-${{ matrix.target }}
+    name: build-linux
     runs-on: ubuntu-latest
     if: inputs.skip_build != true
     strategy:
