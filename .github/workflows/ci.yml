@@ -24,23 +24,23 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  sync:
-    name: Sync
-    runs-on: ubuntu-latest
-    if: inputs.skip_sync != true
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: master
-      - name: Sync
-        env:
-          upstream_repo: geph-official/geph4-client
-        run: |
-          git remote add upstream https://github.com/$upstream_repo.git
-          git fetch upstream
-          git reset --hard $(git log --all --pretty=format:'%H' -n 1)
-          git push
-          git push --tags
+  # sync:
+  #   name: Sync
+  #   runs-on: ubuntu-latest
+  #   if: inputs.skip_sync != true
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         ref: master
+  #     - name: Sync
+  #       env:
+  #         upstream_repo: geph-official/geph4-client
+  #       run: |
+  #         git remote add upstream https://github.com/$upstream_repo.git
+  #         git fetch upstream
+  #         git reset --hard $(git log --all --pretty=format:'%H' -n 1)
+  #         git push
+  #         git push --tags
 
   build-windows:
     name: build-windows
@@ -53,11 +53,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      #   with:
-      #     repository: geph-official/geph4-client
-      #     fetch-depth: 0
-      # - name: Reset latest tag
-      #   run: git reset --hard $(git rev-list --all --max-count=1)
+        with:
+          repository: geph-official/geph4-client
+          fetch-depth: 0
+      - name: Reset latest tag
+        run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to input ref
         if: inputs.reset_hash != null
         run: git reset --hard ${{ inputs.reset_hash }}
@@ -93,11 +93,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      #   with:
-      #     repository: geph-official/geph4-client
-      #     fetch-depth: 0
-      # - name: Reset latest tag
-      #   run: git reset --hard $(git rev-list --all --max-count=1)
+        with:
+          repository: geph-official/geph4-client
+          fetch-depth: 0
+      - name: Reset latest tag
+        run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to input ref
         if: inputs.reset_hash != null
         run: git reset --hard ${{ inputs.reset_hash }}
