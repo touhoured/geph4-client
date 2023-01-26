@@ -118,15 +118,19 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: x86_64-unknown-linux-musl, aarch64-unknown-linux-musl
+          targets: x86_64-unknown-linux-musl
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-unknown-linux-musl
       - name: Install cross
         uses: taiki-e/install-action@cross
       - name: Cache
         uses: Swatinem/rust-cache@v1
-      - name: Install musl-gcc
-        uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: musl-tools
+      # - name: Install musl-gcc
+      #   uses: awalsh128/cache-apt-pkgs-action@latest
+      #   with:
+      #     packages: musl-tools
       - name: build
         run: |
           cross build --target x86_64-unknown-linux-musl --release --locked
@@ -138,7 +142,6 @@ jobs:
       # - name: Package
       #   run: 7z a geph4-client-${{ matrix.target }}.7z geph4-client
       - name: Get tag
-        shell: bash
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
         uses: softprops/action-gh-release@v1
