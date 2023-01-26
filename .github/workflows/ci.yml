@@ -70,8 +70,9 @@ jobs:
       - name: Package
         working-directory: target/${{ matrix.target }}/release
         run: |
-          7z a geph4-client-${{ matrix.target }}.7z geph4-client
+          7z a geph4-client-${{ matrix.target }}.7z geph4-client.exe
       - name: Get tag
+        shell: bash
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
         uses: softprops/action-gh-release@v1
