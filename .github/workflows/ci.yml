@@ -97,13 +97,13 @@ jobs:
     name: build-linux
     runs-on: ubuntu-latest
     if: inputs.skip_build != true
-    # strategy:
-    #   matrix:
-    #     target:
-    #       # - x86_64-unknown-linux-gnu
-    #       - x86_64-unknown-linux-musl
-    #       - aarch64-unknown-linux-musl
-    #       # - aarch64-linux-android
+    strategy:
+      matrix:
+        target:
+          # - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+          - aarch64-unknown-linux-musl
+          # - aarch64-linux-android
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -118,11 +118,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: x86_64-unknown-linux-musl
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-unknown-linux-musl
+          targets: ${{ matrix.target }}
       - name: Install cross
         uses: taiki-e/install-action@cross
       - name: Cache
@@ -133,18 +129,18 @@ jobs:
       #     packages: musl-tools
       - name: build
         run: |
-          cross build --target x86_64-unknown-linux-musl --release --locked
-          cross build --target aarch64-unknown-linux-musl --release --locked
+          cross build --target ${{ matrix.target }} --release --locked
       - name: Move
         run: |
-          sh move_built.sh
-          echo "file=$(find ./OUTPUT)" >> $GITHUB_ENV
-      # - name: Package
-      #   run: 7z a geph4-client-${{ matrix.target }}.7z geph4-client
+          mkdir ./OUTPUT
+          mv target/${{ matrix.target }}/release/geph4-client ./OUTPUT/
+      - name: Package
+        working-directory: OUTPUT
+        run: 7z a geph4-client-${{ matrix.target }}.7z geph4-client
       - name: Get tag
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.tag }}
-          files: ${{ env.file }}
+          files: ./OUTPUT/geph4-client-${{ matrix.target }}.7z
