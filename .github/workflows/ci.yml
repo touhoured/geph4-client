@@ -15,8 +15,8 @@ on:
         required: false
         default: false
         type: boolean
-      reset_sha:
-        description: "Reset to sha"
+      reset_hash:
+        description: "Reset to hash"
         required: false
         type: string
 env:
@@ -93,28 +93,16 @@ jobs:
 #           files: geph4-client-${{ matrix.target }}.7z
 
   build-linux:
-    name: build-linux-${{ matrix.target }}
-    runs-on: ${{ matrix.os }}
+    name: build-linux
+    runs-on: ubuntu-latest
     if: inputs.skip_build != true
     strategy:
       matrix:
         target:
-          - x86_64-unknown-linux-gnu
+          # - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
           - aarch64-unknown-linux-musl
-          - aarch64-linux-android
-        os:
-          - ubuntu-latest
-        bin:
-          - geph4-client
-        include:
-          - target: aarch64-unknown-linux-musl
-            use-cross: true
-          - target: aarch64-linux-android
-            use-cross: true
-          - target: i686-pc-windows-msvc
-            os: windows-latest
-            bin: geph4-client.exe
+          # - aarch64-linux-android
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -124,40 +112,30 @@ jobs:
       - name: Reset latest tag
         run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to input ref
-        if: inputs.reset_sha != null
-        run: git reset --hard ${{ inputs.reset_sha }}
+        if: inputs.reset_hash != null
+        run: git reset --hard ${{ inputs.reset_hash }}
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.target }}
+          targets: x86_64-unknown-linux-musl, aarch64-unknown-linux-musl
       - name: Install cross
-        if: matrix.use-cross == true
         uses: taiki-e/install-action@cross
-#       - name: Cache
-#         uses: Swatinem/rust-cache@v1
+      - name: Cache
+        uses: Swatinem/rust-cache@v1
       - name: Install musl-gcc
-        if: |
-          matrix.target == 'x86_64-unknown-linux-musl' ||
-          matrix.target == 'aarch64-unknown-linux-musl'
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
           packages: musl-tools
-          version: 1.0
-      - name: Cargo build
-        if: matrix.use-cross != true
-        run: cargo build --target ${{ matrix.target }} --release --locked
-      - name: Cross build
-        if: matrix.use-cross == true
-        run: cross build --target ${{ matrix.target }} --release --locked
+      - name: build
+        run: |
+          cross build --target x86_64-unknown-linux-musl --release --locked
+          cross build --target aarch64-unknown-linux-musl --release --locked
       - name: Move
-        run: mv target/${{ matrix.target }}/release/${{ matrix.bin }} ./
-      - name: Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.target }}
-          path: ${{ matrix.bin }}
-      - name: Package
-        run: 7z a geph4-client-${{ matrix.target }}.7z ${{ matrix.bin }}
+        run: |
+          sh move_built.sh
+          echo "file=$(find ./OUTPUT)" >> $GITHUB_ENV
+      # - name: Package
+      #   run: 7z a geph4-client-${{ matrix.target }}.7z geph4-client
       - name: Get tag
         shell: bash
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
@@ -165,4 +143,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.tag }}
-          files: geph4-client-${{ matrix.target }}.7z
+          files: ${{ env.file }}
