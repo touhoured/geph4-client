@@ -6,11 +6,11 @@ on:
     - cron: "0 6 * * *"
   workflow_dispatch:
     inputs:
-#       skip_sync:
-#         description: "Skip sync"
-#         required: false
-#         default: true
-#         type: boolean
+      skip_sync:
+        description: "Skip sync"
+        required: false
+        default: true
+        type: boolean
       skip_build:
         description: "Skip build"
         required: false
@@ -24,74 +24,61 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-#   sync:
-#     name: Sync
-#     runs-on: ubuntu-latest
-#     if: inputs.skip_sync != true
-#     steps:
-#       - uses: actions/checkout@v3
-#         with:
-#           ref: master
-#       - name: Sync
-#         env:
-#           upstream_repo: geph-official/geph4-client
-#         run: |
-#           git remote add upstream https://github.com/$upstream_repo.git
-#           git fetch upstream
-#           hash=$(git log --all --pretty=format:'%H' -n 1)
-#           git reset --hard $hash
-#           git push
-#           git push --tags
+  sync:
+    name: Sync
+    runs-on: ubuntu-latest
+    if: inputs.skip_sync != true
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: master
+      - name: Sync
+        env:
+          upstream_repo: geph-official/geph4-client
+        run: |
+          git remote add upstream https://github.com/$upstream_repo.git
+          git fetch upstream
+          git reset --hard $(git log --all --pretty=format:'%H' -n 1)
+          git push
+          git push --tags
 
-#   build-windows:
-#     name: build-windows-${{ matrix.target }}
-#     runs-on: windows-latest
-#     if: inputs.skip_build != true
-#     strategy:
-#       matrix:
-#         target:
-#           - i686-pc-windows-msvc
-#         # include:
-#         #   - target: i686-pc-windows-gnu
-#         #     use-cross: true
-#     steps:
-#       - name: Checkout
-#         if: inputs.ref == null
-#         uses: actions/checkout@v3
-#         with:
-#           repository: geph-official/geph4-client
-#           ref: master
-#       - name: Checkout custom
-#         if: inputs.ref != null
-#         uses: actions/checkout@v3
-#         with:
-#           repository: geph-official/geph4-client
-#           ref: ${{ inputs.ref}}
-#       - name: Install Rust
-#         uses: dtolnay/rust-toolchain@stable
-#         with:
-#           targets: ${{ matrix.target }}
-# #       - name: Cache
-# #         uses: Swatinem/rust-cache@v1
-#       - name: Build
-#         run: cargo build --target ${{ matrix.target }} --release --locked
-#       - name: Move
-#         run: mv target/${{ matrix.target }}/release/geph4-client.exe ./
-#       - name: Artifacts
-#         uses: actions/upload-artifact@v3
-#         with:
-#           name: ${{ matrix.target }}
-#           path: geph4-client.exe
-#       - name: Package
-#         run: 7z a geph4-client-${{ matrix.target }}.7z geph4-client.exe
-#       - name: Get tag
-#         id: tag
-#         uses: JinoArch/get-latest-tag@latest
-#       - name: Releases
-#         uses: softprops/action-gh-release@v1
-#         with:
-#           tag_name: ${{ steps.tag.outputs.latestTag }}
-#           files: geph4-client-${{ matrix.target }}.7z
+  build-windows:
+    name: build-windows
+    runs-on: windows-latest
+    if: inputs.skip_build != true
+    strategy:
+      matrix:
+        target:
+          - i686-pc-windows-msvc
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: geph-official/geph4-client
+          fetch-depth: 0
+      - name: Reset latest tag
+        run: git reset --hard $(git rev-list --all --max-count=1)
+      - name: Reset to input ref
+        if: inputs.reset_hash != null
+        run: git reset --hard ${{ inputs.reset_hash }}
+      - name: Install cross
+        uses: taiki-e/install-action@cross
+      - name: Cache
+        uses: Swatinem/rust-cache@v1
+      - name: build
+        run: cross build --target ${{ matrix.target }} --release --locked
+      - name: Move and Package
+        run: |
+          mkdir ./OUTPUT
+          mv target/${{ matrix.target }}/release/geph4-client.exe ./OUTPUT/
+          7z a geph4-client-${{ matrix.target }}.7z geph4-client.exe
+      - name: Get tag
+        run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
+      - name: Releases
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.tag }}
+          files: ./OUTPUT/geph4-client-${{ matrix.target }}.7z
 
   build-linux:
     name: build-linux
@@ -123,20 +110,14 @@ jobs:
         uses: taiki-e/install-action@cross
       - name: Cache
         uses: Swatinem/rust-cache@v1
-      # - name: Install musl-gcc
-      #   uses: awalsh128/cache-apt-pkgs-action@latest
-      #   with:
-      #     packages: musl-tools
       - name: build
         run: |
           cross build --target ${{ matrix.target }} --release --locked
-      - name: Move
+      - name: Move and Package
         run: |
           mkdir ./OUTPUT
           mv target/${{ matrix.target }}/release/geph4-client ./OUTPUT/
-      - name: Package
-        working-directory: OUTPUT
-        run: 7z a geph4-client-${{ matrix.target }}.7z geph4-client
+          7z a geph4-client-${{ matrix.target }}.7z geph4-client
       - name: Get tag
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
