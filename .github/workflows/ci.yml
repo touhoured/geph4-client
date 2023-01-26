@@ -61,8 +61,8 @@ jobs:
       - name: Reset to input ref
         if: inputs.reset_hash != null
         run: git reset --hard ${{ inputs.reset_hash }}
-      - name: Install cross
-        uses: taiki-e/install-action@cross
+      # - name: Install cross
+      #   uses: taiki-e/install-action@cross
       - name: Cache
         uses: Swatinem/rust-cache@v1
       - name: build
