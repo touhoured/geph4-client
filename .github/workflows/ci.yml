@@ -122,7 +122,7 @@ jobs:
           files: target/${{ matrix.target }}/release/geph4-client-${{ matrix.target }}.7z
 
   build-android:
-    name: build-linux
+    name: build-android
     runs-on: ubuntu-latest
     if: inputs.skip_build != true
     strategy:
@@ -144,6 +144,10 @@ jobs:
         uses: taiki-e/install-action@cross
       - name: Cache
         uses: Swatinem/rust-cache@v1
+      - name: Cache Docker images.
+        uses: ScribeMD/docker-cache@0.2.7
+        with:
+          key: docker-${{ runner.os }}-${{ hashFiles(...) }}
       - name: build
         run: |
           sh cross-setup.sh
