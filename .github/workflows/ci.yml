@@ -67,17 +67,17 @@ jobs:
         uses: Swatinem/rust-cache@v1
       - name: build
         run: cargo build --target ${{ matrix.target }} --release --locked
-      - name: Move and Package
+      - name: Package
+        working-directory: target/${{ matrix.target }}/release
         run: |
-          mv target/${{ matrix.target }}/release/geph4-client.exe 
-          7z a geph4-client-${{ matrix.target }}.7z geph4-client.exe
+          7z a geph4-client-${{ matrix.target }}.7z geph4-client
       - name: Get tag
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.tag }}
-          files: geph4-client-${{ matrix.target }}.7z
+          files: target/${{ matrix.target }}/release/geph4-client-${{ matrix.target }}.7z
 
   build-linux:
     name: build-linux
@@ -89,7 +89,7 @@ jobs:
           # - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
           - aarch64-unknown-linux-musl
-          - aarch64-linux-android
+          # - aarch64-linux-android
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -108,9 +108,9 @@ jobs:
       - name: build
         run: |
           cross build --target ${{ matrix.target }} --release --locked
-      - name: Move and Package
+      - name: Package
+        working-directory: target/${{ matrix.target }}/release
         run: |
-          mv target/${{ matrix.target }}/release/geph4-client .
           7z a geph4-client-${{ matrix.target }}.7z geph4-client
       - name: Get tag
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
@@ -118,4 +118,43 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.tag }}
-          files: geph4-client-${{ matrix.target }}.7z
+          files: target/${{ matrix.target }}/release/geph4-client-${{ matrix.target }}.7z
+
+  build-android:
+    name: build-linux
+    runs-on: ubuntu-latest
+    if: inputs.skip_build != true
+    strategy:
+      matrix:
+        target:
+          - aarch64-linux-android
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: geph-official/geph4-client
+          fetch-depth: 0
+      - name: Reset latest tag
+        run: git reset --hard $(git rev-list --all --max-count=1)
+      - name: Reset to input ref
+        if: inputs.reset_hash != null
+        run: git reset --hard ${{ inputs.reset_hash }}
+      - name: Install cross
+        uses: taiki-e/install-action@cross
+      - name: Cache
+        uses: Swatinem/rust-cache@v1
+      - name: build
+        run: |
+          sh cross-setup.sh
+          cross build --target ${{ matrix.target }} --release --locked
+      - name: Package
+        working-directory: target/${{ matrix.target }}/release
+        run: |
+          7z a geph4-client-${{ matrix.target }}.7z geph4-client
+      - name: Get tag
+        run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
+      - name: Releases
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.tag }}
+          files: target/${{ matrix.target }}/release/geph4-client-${{ matrix.target }}.7z
