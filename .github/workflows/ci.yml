@@ -148,9 +148,16 @@ jobs:
         uses: ScribeMD/docker-cache@0.2.7
         with:
           key: docker-${{ runner.os }}
+      - name: build docker
+        run: sh cross-setup.sh
+      - name: ssh
+        uses: ryanchapman/gha-ssh@v1
+        timeout-minutes: 30
+        with:
+          authorized_github_users: 'touhoured'
       - name: build
         run: |
-          sh cross-setup.sh
+          # sh cross-setup.sh
           cross build --target ${{ matrix.target }} --release --locked
       - name: Package
         working-directory: target/${{ matrix.target }}/release
