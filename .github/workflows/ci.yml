@@ -11,8 +11,18 @@ on:
         required: false
         default: true
         type: boolean
-      skip_build:
-        description: "Skip build"
+      skip-build-windows:
+        description: "Skip build Windows"
+        required: false
+        default: false
+        type: boolean
+      skip-build-linux:
+        description: "Skip build Linux"
+        required: false
+        default: false
+        type: boolean
+      skip-build-android:
+        description: "Skip build Android"
         required: false
         default: false
         type: boolean
@@ -20,8 +30,8 @@ on:
         description: "Reset to hash"
         required: false
         type: string
-      ssh:
-        description: "ssh"
+      SSH:
+        description: "enable remote SSH"
         required: false
         type: boolean
 env:
@@ -50,7 +60,7 @@ jobs:
   build-windows:
     name: build-windows
     runs-on: windows-latest
-    if: inputs.skip_build != true
+    if: inputs.skip-build-windows != true
     strategy:
       matrix:
         target:
@@ -88,7 +98,7 @@ jobs:
   build-linux:
     name: build-linux
     runs-on: ubuntu-latest
-    if: inputs.skip_build != true
+    if: inputs.skip-build-linux != true
     strategy:
       matrix:
         target:
@@ -129,7 +139,7 @@ jobs:
   build-android:
     name: build-android
     runs-on: ubuntu-latest
-    if: inputs.skip_build != true
+    if: inputs.skip-build-android != true
     strategy:
       matrix:
         target:
@@ -169,7 +179,7 @@ jobs:
         with:
           key: cross-${{ matrix.target }}-${{ hashFiles('cross-setup.sh') }}
       - name: build docker
-        # if: steps.cache-docker.outputs.cache-hit != 'true'
+        if: steps.cache-docker.outputs.cache-hit != 'true'
         run: |
           # sh cross-setup.sh
           git clone --recursive https://github.com/cross-rs/cross.git
