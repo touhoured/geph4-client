@@ -167,9 +167,11 @@ jobs:
         uses: Swatinem/rust-cache@v1
       - name: Cache Docker images.
         uses: ScribeMD/docker-cache@0.2.7
+        id: cache-docker
         with:
           key: docker-${{ runner.os }}-${{ hashFiles(cross-setup.sh) }}
       - name: build docker
+        if: steps.cache-docker.outputs.cache-hit != 'true'
         run: |
           sh cross-setup.sh
           # cargo build-docker-image ${{ matrix.target }} \
