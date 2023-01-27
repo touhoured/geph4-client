@@ -188,7 +188,7 @@ jobs:
           --build-arg ANDROID_NDK=r25b \
           --build-arg ANDROID_SDK=21 \
           --build-arg ANDROID_VERSION=5.0.0_r1 \
-          --tag ghcr.io/cross-rs/${{ matrix.target }}:local
+          --tag local
           # docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
       # - name: install cargo-ndk
       #   run: cargo install cargo-ndk
