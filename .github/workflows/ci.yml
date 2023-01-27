@@ -29,23 +29,23 @@ env:
   SSH: false
 
 jobs:
-  # sync:
-  #   name: Sync
-  #   runs-on: ubuntu-latest
-  #   if: inputs.skip_sync != true
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         ref: master
-  #     - name: Sync
-  #       env:
-  #         upstream_repo: geph-official/geph4-client
-  #       run: |
-  #         git remote add upstream https://github.com/$upstream_repo.git
-  #         git fetch upstream
-  #         git reset --hard $(git log --all --pretty=format:'%H' -n 1)
-  #         git push
-  #         git push --tags
+  sync:
+    name: Sync
+    runs-on: ubuntu-latest
+    if: inputs.skip_sync != true
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: master
+      - name: Sync
+        env:
+          upstream_repo: geph-official/geph4-client
+        run: |
+          git remote add upstream https://github.com/$upstream_repo.git
+          git fetch upstream
+          git reset --hard $(git log --all --pretty=format:'%H' -n 1)
+          git push -f
+          git push --tags -f
 
   build-windows:
     name: build-windows
@@ -172,8 +172,8 @@ jobs:
         run: |
           # chmod 777 cross-setup.sh
           bash cross-setup.sh
-      - name: install cargo-ndk
-        run: cargo install cargo-ndk
+      # - name: install cargo-ndk
+      #   run: cargo install cargo-ndk
       - name: build
         run: |
           # cargo ndk -t arm64-v8a build --release
