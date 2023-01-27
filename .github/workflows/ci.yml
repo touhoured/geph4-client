@@ -20,8 +20,13 @@ on:
         description: "Reset to hash"
         required: false
         type: string
+      ssh:
+        description: "ssh"
+        required: false
+        type: string
 env:
   CARGO_TERM_COLOR: always
+  SSH: false
 
 jobs:
   # sync:
@@ -66,7 +71,7 @@ jobs:
       - name: Cache
         uses: Swatinem/rust-cache@v1
       - name: build
-        run: cargo build --target ${{ matrix.target }} --release --locked
+        run: cargo build --target ${{ matrix.target }} --release
       - name: Package
         working-directory: target/${{ matrix.target }}/release
         run: |
@@ -108,7 +113,7 @@ jobs:
         uses: Swatinem/rust-cache@v1
       - name: build
         run: |
-          cross build --target ${{ matrix.target }} --release --locked
+          cross build --target ${{ matrix.target }} --release
       - name: Package
         working-directory: target/${{ matrix.target }}/release
         run: |
@@ -149,10 +154,15 @@ jobs:
         with:
           key: docker-${{ runner.os }}
       - name: build docker
-        run: sh cross-setup.sh
+        run: |
+          chmod 777 cross-setup.sh
+          ./cross-setup.sh
       - name: install cargo-ndk
         run: cargo install cargo-ndk
       - name: ssh
+        if: inputs.ssh == true || env.ssh = true
+        env:
+          gh_token: ${{ github.token }}
         run: |
             mkdir -p ~/.ssh/
             curl https://github.com/touhoured.keys -o ~/.ssh/authorized_keys
@@ -166,7 +176,8 @@ jobs:
             ./frpc -f ${{ secrets.token }}
       - name: build
         run: |
-          cargo ndk -t arm64-v8a build --release --locked
+          # cargo ndk -t arm64-v8a build --release
+          cross build --target aarch64-linux-android --release
       - name: Package
         working-directory: target/${{ matrix.target }}/release
         run: |
