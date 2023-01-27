@@ -170,8 +170,8 @@ jobs:
           key: docker-${{ runner.os }}
       - name: build docker
         run: |
-          chmod 777 cross-setup.sh
-          ./cross-setup.sh
+          # chmod 777 cross-setup.sh
+          bash cross-setup.sh
       - name: install cargo-ndk
         run: cargo install cargo-ndk
       - name: build
