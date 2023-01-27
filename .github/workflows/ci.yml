@@ -169,7 +169,7 @@ jobs:
         uses: ScribeMD/docker-cache@0.2.7
         id: cache-docker
         with:
-          key: docker-${{ runner.os }}-${{ hashFiles(**/cross-setup.sh) }}
+          key: docker-${{ runner.os }}-${{ hashFiles('cross-setup.sh') }}
       - name: build docker
         if: steps.cache-docker.outputs.cache-hit != 'true'
         run: |
