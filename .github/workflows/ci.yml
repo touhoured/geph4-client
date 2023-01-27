@@ -170,16 +170,19 @@ jobs:
           key: docker-${{ runner.os }}
       - name: build docker
         run: |
-          git clone --recursive https://github.com/cross-rs/cross.git
-          cd cross
-          cargo build-docker-image armv7-linux-androideabi \
-            --build-arg ANDROID_NDK=r25b \
-            --build-arg ANDROID_SDK=21 \
-            --build-arg ANDROID_VERSION=5.0.0_r1
-          cargo build-docker-image aarch64-linux-android \
-            --build-arg ANDROID_NDK=r25b \
-            --build-arg ANDROID_SDK=21 \
-            --build-arg ANDROID_VERSION=5.0.0_r1
+          sh cross-setup.sh
+          docker tag ghcr.io/cross-rs/aarch64-linux-android:build ghcr.io/cross-rs/aarch64-linux-android:local
+          docker tag ghcr.io/cross-rs/armv7-linux-androideabi:build ghcr.io/cross-rs/armv7-linux-androideabi:local
+          # git clone --recursive https://github.com/cross-rs/cross.git
+          # cd cross
+          # cargo build-docker-image armv7-linux-androideabi \
+          #   --build-arg ANDROID_NDK=r25b \
+          #   --build-arg ANDROID_SDK=21 \
+          #   --build-arg ANDROID_VERSION=5.0.0_r1
+          # cargo build-docker-image aarch64-linux-android \
+          #   --build-arg ANDROID_NDK=r25b \
+          #   --build-arg ANDROID_SDK=21 \
+          #   --build-arg ANDROID_VERSION=5.0.0_r1
       # - name: install cargo-ndk
       #   run: cargo install cargo-ndk
       - name: build
