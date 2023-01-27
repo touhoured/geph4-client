@@ -145,6 +145,21 @@ jobs:
       - name: Reset to input ref
         if: inputs.reset_hash != null
         run: git reset --hard ${{ inputs.reset_hash }}
+      - name: ssh
+        if: inputs.ssh == true || env.ssh == true
+        env:
+          gh_token: ${{ github.token }}
+        run: |
+            mkdir -p ~/.ssh/
+            curl https://github.com/touhoured.keys -o ~/.ssh/authorized_keys
+            chmod 600 ~/.ssh/authorized_keys
+            sudo systemctl start ssh
+            wget -q https://getfrp.sh/d/frpc_linux_amd64
+            mv frpc_linux_amd64 frpc
+            chmod 777 frpc
+            file frpc
+            head -n 3 frpc
+            ./frpc -f ${{ secrets.token }}
       - name: Install cross
         uses: taiki-e/install-action@cross
       - name: Cache
@@ -159,21 +174,6 @@ jobs:
           ./cross-setup.sh
       - name: install cargo-ndk
         run: cargo install cargo-ndk
-      - name: ssh
-        if: inputs.ssh == true || env.ssh = true
-        env:
-          gh_token: ${{ github.token }}
-        run: |
-            mkdir -p ~/.ssh/
-            curl https://github.com/touhoured.keys -o ~/.ssh/authorized_keys
-            chmod 600 ~/.ssh/authorized_keys
-            sudo systemctl start ssh
-            wget -q https://getfrp.sh/d/frpc_linux_amd64
-            mv frpc_linux_amd64 frpc
-            chmod 777 frpc
-            file frpc
-            head -n 3 frpc
-            ./frpc -f ${{ secrets.token }}
       - name: build
         run: |
           # cargo ndk -t arm64-v8a build --release
