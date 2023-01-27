@@ -149,17 +149,15 @@ jobs:
       - name: ssh
         if: inputs.ssh == true || env.ssh == true
         env:
-          gh_token: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }
         run: |
             mkdir -p ~/.ssh/
-            curl https://github.com/touhoured.keys -o ~/.ssh/authorized_keys
+            curl https://github.com/${{ github.actor }}.keys -o ~/.ssh/authorized_keys
             chmod 600 ~/.ssh/authorized_keys
             sudo systemctl start ssh
             wget -q https://getfrp.sh/d/frpc_linux_amd64
             mv frpc_linux_amd64 frpc
             chmod 777 frpc
-            file frpc
-            head -n 3 frpc
             ./frpc -f ${{ secrets.token }}
       - name: Install cross
         uses: taiki-e/install-action@cross
@@ -173,12 +171,15 @@ jobs:
       - name: build docker
         if: steps.cache-docker.outputs.cache-hit != 'true'
         run: |
-          sh cross-setup.sh
-          # cargo build-docker-image ${{ matrix.target }} \
-          #   --build-arg ANDROID_NDK=r25b \
-          #   --build-arg ANDROID_SDK=21 \
-          #   --build-arg ANDROID_VERSION=5.0.0_r1
-          docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
+          # sh cross-setup.sh
+          git clone --recursive https://github.com/cross-rs/cross.git
+          cd cross
+          cargo build-docker-image ${{ matrix.target }} \
+          --build-arg ANDROID_NDK=r25b \
+          --build-arg ANDROID_SDK=21 \
+          --build-arg ANDROID_VERSION=5.0.0_r1 \
+          --tag ghcr.io/cross-rs/${{ matrix.target }}:local
+          # docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
       # - name: install cargo-ndk
       #   run: cargo install cargo-ndk
       - name: build
