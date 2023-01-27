@@ -149,7 +149,7 @@ jobs:
       - name: ssh
         if: inputs.ssh == true || env.ssh == true
         env:
-          GH_TOKEN: ${{ github.token }
+          GH_TOKEN: ${{ github.token }}
         run: |
             mkdir -p ~/.ssh/
             curl https://github.com/${{ github.actor }}.keys -o ~/.ssh/authorized_keys
@@ -169,7 +169,7 @@ jobs:
         with:
           key: cross-${{ matrix.target }}-${{ hashFiles('cross-setup.sh') }}
       - name: build docker
-        if: steps.cache-docker.outputs.cache-hit != 'true'
+        # if: steps.cache-docker.outputs.cache-hit != 'true'
         run: |
           # sh cross-setup.sh
           git clone --recursive https://github.com/cross-rs/cross.git
