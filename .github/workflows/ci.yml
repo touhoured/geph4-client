@@ -30,13 +30,8 @@ on:
         description: "Reset to hash"
         required: false
         type: string
-      SSH:
-        description: "enable remote SSH"
-        required: false
-        type: boolean
 env:
   CARGO_TERM_COLOR: always
-  SSH: false
 
 jobs:
   sync:
@@ -156,19 +151,6 @@ jobs:
       - name: Reset to input ref
         if: inputs.reset_hash != null
         run: git reset --hard ${{ inputs.reset_hash }}
-      - name: ssh
-        if: inputs.ssh == true || env.ssh == true
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-            mkdir -p ~/.ssh/
-            curl https://github.com/${{ github.actor }}.keys -o ~/.ssh/authorized_keys
-            chmod 600 ~/.ssh/authorized_keys
-            sudo systemctl start ssh
-            wget -q https://getfrp.sh/d/frpc_linux_amd64
-            mv frpc_linux_amd64 frpc
-            chmod 777 frpc
-            ./frpc -f ${{ secrets.token }}
       - name: Install cross
         uses: taiki-e/install-action@cross
       - name: Cache
@@ -185,10 +167,10 @@ jobs:
           git clone --recursive https://github.com/cross-rs/cross.git
           cd cross
           cargo build-docker-image ${{ matrix.target }} \
-          --build-arg ANDROID_NDK=r25b \
-          --build-arg ANDROID_SDK=21 \
-          --build-arg ANDROID_VERSION=5.0.0_r1 \
-          --tag local
+            --build-arg ANDROID_NDK=r25b \
+            --build-arg ANDROID_SDK=21 \
+            --build-arg ANDROID_VERSION=5.0.0_r1 \
+            --tag local
           # docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
       # - name: install cargo-ndk
       #   run: cargo install cargo-ndk
