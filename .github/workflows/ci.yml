@@ -177,6 +177,8 @@ jobs:
       - name: build
         run: |
           # cargo ndk -t arm64-v8a build --release
+          docker system df -v
+          docker ps -a
           cross build --target aarch64-linux-android --release
       - name: Package
         working-directory: target/${{ matrix.target }}/release
