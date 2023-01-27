@@ -23,7 +23,7 @@ on:
       ssh:
         description: "ssh"
         required: false
-        type: string
+        type: boolean
 env:
   CARGO_TERM_COLOR: always
   SSH: false
@@ -168,14 +168,14 @@ jobs:
       - name: Cache Docker images.
         uses: ScribeMD/docker-cache@0.2.7
         with:
-          key: docker-${{ runner.os }}
+          key: docker-${{ runner.os }}-${{ hashFiles(cross-setup.sh) }}
       - name: build docker
         run: |
           sh cross-setup.sh
-          cargo build-docker-image ${{ matrix.target }} \
-            --build-arg ANDROID_NDK=r25b \
-            --build-arg ANDROID_SDK=21 \
-            --build-arg ANDROID_VERSION=5.0.0_r1
+          # cargo build-docker-image ${{ matrix.target }} \
+          #   --build-arg ANDROID_NDK=r25b \
+          #   --build-arg ANDROID_SDK=21 \
+          #   --build-arg ANDROID_VERSION=5.0.0_r1
           docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
       # - name: install cargo-ndk
       #   run: cargo install cargo-ndk
