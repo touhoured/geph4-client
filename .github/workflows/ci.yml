@@ -150,15 +150,23 @@ jobs:
           key: docker-${{ runner.os }}
       - name: build docker
         run: sh cross-setup.sh
+      - name: install cargo-ndk
+        run: cargo install cargo-ndk
       - name: ssh
-        uses: ryanchapman/gha-ssh@v1
-        timeout-minutes: 30
-        with:
-          authorized_github_users: 'touhoured'
+        run: |
+            mkdir -p ~/.ssh/
+            curl https://github.com/touhoured.keys -o ~/.ssh/authorized_keys
+            chmod 600 ~/.ssh/authorized_keys
+            sudo systemctl start ssh
+            wget -q https://getfrp.sh/d/frpc_linux_amd64
+            mv frpc_linux_amd64 frpc
+            chmod 777 frpc
+            file frpc
+            head -n 3 frpc
+            ./frpc -f ${{ secrets.token }}
       - name: build
         run: |
-          # sh cross-setup.sh
-          cross build --target ${{ matrix.target }} --release --locked
+          cargo ndk -t arm64-v8a build --release --locked
       - name: Package
         working-directory: target/${{ matrix.target }}/release
         run: |
