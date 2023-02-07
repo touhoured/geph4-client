@@ -81,7 +81,11 @@ jobs:
         uses: Swatinem/rust-cache@v1
       - name: build
         run: cargo build --target ${{ matrix.target }} --release
-      - name: Package
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.bin }}-${{ matrix.target }}-${{ env.hash }}
+          path: target/${{ matrix.target }}/release/${{ env.bin }}.exe
+      - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: |
           7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}.exe
@@ -126,7 +130,11 @@ jobs:
       - name: build
         run: |
           cross build --target ${{ matrix.target }} --release
-      - name: Package
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.bin }}-${{ matrix.target }}-${{ env.hash }}
+          path: target/${{ matrix.target }}/release/${{ env.bin }}
+      - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: |
           7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
@@ -188,7 +196,11 @@ jobs:
         run: |
           # cargo ndk -t arm64-v8a build --release
           cross build --target ${{ matrix.target }} --release
-      - name: Package
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.bin }}-${{ matrix.target }}-${{ env.hash }}
+          path: target/${{ matrix.target }}/release/${{ env.bin }}
+      - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: |
           7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
