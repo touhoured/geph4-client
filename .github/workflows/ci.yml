@@ -83,7 +83,7 @@ jobs:
           full_hash=$(git log --pretty=format:%H -n 1 --all)
           tag_name=$(git describe --tags)
           echo "hash=$hash" >> $GITHUB_ENV
-          echo "full_hash=$hash" >> $GITHUB_ENV
+          echo "full_hash=$full_hash" >> $GITHUB_ENV
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
       - name: Cache
@@ -139,7 +139,7 @@ jobs:
           full_hash=$(git log --pretty=format:%H -n 1 --all)
           tag_name=$(git describe --tags)
           echo "hash=$hash" >> $GITHUB_ENV
-          echo "full_hash=$hash" >> $GITHUB_ENV
+          echo "full_hash=$full_hash" >> $GITHUB_ENV
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
       - name: Install cross
@@ -198,7 +198,7 @@ jobs:
           full_hash=$(git log --pretty=format:%H -n 1 --all)
           tag_name=$(git describe --tags)
           echo "hash=$hash" >> $GITHUB_ENV
-          echo "full_hash=$hash" >> $GITHUB_ENV
+          echo "full_hash=$full_hash" >> $GITHUB_ENV
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
       - name: Install cross
