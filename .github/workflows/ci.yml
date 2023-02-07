@@ -38,15 +38,16 @@ jobs:
     name: Sync
     runs-on: ubuntu-latest
     if: inputs.skip_sync != true
+    env:
+      bin: geph4-client
+      upstream: geph-official/geph4-client
     steps:
       - uses: actions/checkout@v3
         with:
           ref: master
       - name: Sync
-        env:
-          upstream_repo: geph-official/geph4-client
         run: |
-          git remote add upstream https://github.com/$upstream_repo.git
+          git remote add upstream https://github.com/$upstream.git
           git fetch upstream
           git reset --hard $(git log --all --pretty=format:'%H' -n 1)
           git push -f
@@ -60,11 +61,14 @@ jobs:
       matrix:
         target:
           - i686-pc-windows-msvc
+    env:
+      bin: geph4-client
+      upstream: geph-official/geph4-client
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          repository: geph-official/geph4-client
+          repository: ${{ env.upstream }}
           fetch-depth: 0
       - name: Reset latest tag
         run: git reset --hard $(git rev-list --all --max-count=1)
@@ -80,7 +84,7 @@ jobs:
       - name: Package
         working-directory: target/${{ matrix.target }}/release
         run: |
-          7z a geph4-client-${{ matrix.target }}.7z geph4-client.exe
+          7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
       - name: Get tag
         shell: bash
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
@@ -88,7 +92,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.tag }}
-          files: target/${{ matrix.target }}/release/geph4-client-${{ matrix.target }}.7z
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
 
   build-linux:
     name: build-linux
@@ -101,11 +105,14 @@ jobs:
           - x86_64-unknown-linux-musl
           - aarch64-unknown-linux-musl
           # - aarch64-linux-android
+    env:
+      bin: geph4-client
+      upstream: geph-official/geph4-client
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          repository: geph-official/geph4-client
+          repository: ${{ env.upstream }}
           fetch-depth: 0
       - name: Reset latest tag
         run: git reset --hard $(git rev-list --all --max-count=1)
@@ -122,14 +129,14 @@ jobs:
       - name: Package
         working-directory: target/${{ matrix.target }}/release
         run: |
-          7z a geph4-client-${{ matrix.target }}.7z geph4-client
+          7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
       - name: Get tag
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.tag }}
-          files: target/${{ matrix.target }}/release/geph4-client-${{ matrix.target }}.7z
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
 
   build-android:
     name: build-android
@@ -140,11 +147,14 @@ jobs:
         target:
           - aarch64-linux-android
           - armv7-linux-androideabi
+    env:
+      bin: geph4-client
+      upstream: geph-official/${{ env.bin }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          repository: geph-official/geph4-client
+          repository: ${{ env.upstream }}
           fetch-depth: 0
       - name: Reset latest tag
         run: git reset --hard $(git rev-list --all --max-count=1)
@@ -181,11 +191,11 @@ jobs:
       - name: Package
         working-directory: target/${{ matrix.target }}/release
         run: |
-          7z a geph4-client-${{ matrix.target }}.7z geph4-client
+          7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
       - name: Get tag
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.tag }}
-          files: target/${{ matrix.target }}/release/geph4-client-${{ matrix.target }}.7z
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
