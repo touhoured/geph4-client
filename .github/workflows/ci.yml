@@ -132,8 +132,10 @@ jobs:
         run: |
           date=$(date -I)
           hash=$(git log --pretty=format:%h -n 1 --all)
+          full_hash=$(git log --pretty=format:%H -n 1 --all)
           tag_name=$(git describe --tags)
           echo "hash=$hash" >> $GITHUB_ENV
+          echo "full_hash=$hash" >> $GITHUB_ENV
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
       - name: Install cross
@@ -233,5 +235,5 @@ jobs:
         with:
           name: ${{ env.tag_name }}-${{ env.date }}
           tag_name: ${{ env.tag_name }}
-          target_commitish: ${{ env.hash }}
+          target_commitish: ${{ env.full_hash }}
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
