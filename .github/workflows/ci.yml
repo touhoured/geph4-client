@@ -62,7 +62,7 @@ jobs:
         target:
           - i686-pc-windows-msvc
     env:
-      bin: geph4-client
+      bin: geph4-client.exe
       upstream: geph-official/geph4-client
     steps:
       - name: Checkout
