@@ -84,11 +84,11 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.bin }}-${{ matrix.target }}-${{ env.hash }}
-          path: target/${{ matrix.target }}/release/${{ env.bin }}.exe
+          path: target/${{ matrix.target }}/release/${{ env.bin }}
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: |
-          7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}.exe
+          7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
       - name: Get tag
         shell: bash
         run: echo "tag_name=$(git describe --tags)" >> $GITHUB_ENV
