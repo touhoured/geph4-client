@@ -101,7 +101,7 @@ jobs:
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
-          name: ${{ env.tag_name }}-${{ env.date }}
+          name: ${{ env.tag_name }}
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
@@ -162,7 +162,7 @@ jobs:
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
-          name: ${{ env.tag_name }}-${{ env.date }}
+          name: ${{ env.tag_name }}
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
@@ -241,7 +241,7 @@ jobs:
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
-          name: ${{ env.tag_name }}-${{ env.date }}
+          name: ${{ env.tag_name }}
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
