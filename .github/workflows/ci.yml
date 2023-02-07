@@ -75,23 +75,21 @@ jobs:
       - name: Reset to input ref
         if: inputs.reset_hash != null
         run: git reset --hard ${{ inputs.reset_hash }}
-      # - name: Install cross
-      #   uses: taiki-e/install-action@cross
+      - name: Get tag
+        shell: bash
+        run: echo "tag_name=$(git describe --tags)" >> $GITHUB_ENV
       - name: Cache
         uses: Swatinem/rust-cache@v1
       - name: build
         run: cargo build --target ${{ matrix.target }} --release
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.bin }}-${{ matrix.target }}-${{ env.hash }}
+          name: ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}
           path: target/${{ matrix.target }}/release/${{ env.bin }}
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: |
           7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
-      - name: Get tag
-        shell: bash
-        run: echo "tag_name=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
@@ -123,6 +121,9 @@ jobs:
       - name: Reset to input ref
         if: inputs.reset_hash != null
         run: git reset --hard ${{ inputs.reset_hash }}
+      - name: Get tag
+        shell: bash
+        run: echo "tag_name=$(git describe --tags)" >> $GITHUB_ENV
       - name: Install cross
         uses: taiki-e/install-action@cross
       - name: Cache
@@ -132,7 +133,7 @@ jobs:
           cross build --target ${{ matrix.target }} --release
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.bin }}-${{ matrix.target }}-${{ env.hash }}
+          name: ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}
           path: target/${{ matrix.target }}/release/${{ env.bin }}
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
@@ -169,6 +170,9 @@ jobs:
       - name: Reset to input ref
         if: inputs.reset_hash != null
         run: git reset --hard ${{ inputs.reset_hash }}
+      - name: Get tag
+        shell: bash
+        run: echo "tag_name=$(git describe --tags)" >> $GITHUB_ENV
       - name: Install cross
         uses: taiki-e/install-action@cross
       - name: Cache
@@ -198,7 +202,7 @@ jobs:
           cross build --target ${{ matrix.target }} --release
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.bin }}-${{ matrix.target }}-${{ env.hash }}
+          name: ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}
           path: target/${{ matrix.target }}/release/${{ env.bin }}
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
