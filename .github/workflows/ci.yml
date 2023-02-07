@@ -75,9 +75,15 @@ jobs:
       - name: Reset to input ref
         if: inputs.reset_hash != null
         run: git reset --hard ${{ inputs.reset_hash }}
-      - name: Get tag
+      - name: Get version
         shell: bash
-        run: echo "tag_name=$(git describe --tags)" >> $GITHUB_ENV
+        run: |
+          date=$(date -I)
+          hash=$(git log --pretty=format:%h -n 1 --all)
+          tag_name=$(git describe --tags)
+          echo "hash=$hash" >> $GITHUB_ENV
+          echo "date=$date" >> $GITHUB_ENV
+          echo "tag_name=$tag_name" >> $GITHUB_ENV
       - name: Cache
         uses: Swatinem/rust-cache@v1
       - name: build
@@ -121,9 +127,15 @@ jobs:
       - name: Reset to input ref
         if: inputs.reset_hash != null
         run: git reset --hard ${{ inputs.reset_hash }}
-      - name: Get tag
+      - name: Get version
         shell: bash
-        run: echo "tag_name=$(git describe --tags)" >> $GITHUB_ENV
+        run: |
+          date=$(date -I)
+          hash=$(git log --pretty=format:%h -n 1 --all)
+          tag_name=$(git describe --tags)
+          echo "hash=$hash" >> $GITHUB_ENV
+          echo "date=$date" >> $GITHUB_ENV
+          echo "tag_name=$tag_name" >> $GITHUB_ENV
       - name: Install cross
         uses: taiki-e/install-action@cross
       - name: Cache
@@ -170,9 +182,15 @@ jobs:
       - name: Reset to input ref
         if: inputs.reset_hash != null
         run: git reset --hard ${{ inputs.reset_hash }}
-      - name: Get tag
+      - name: Get version
         shell: bash
-        run: echo "tag_name=$(git describe --tags)" >> $GITHUB_ENV
+        run: |
+          date=$(date -I)
+          hash=$(git log --pretty=format:%h -n 1 --all)
+          tag_name=$(git describe --tags)
+          echo "hash=$hash" >> $GITHUB_ENV
+          echo "date=$date" >> $GITHUB_ENV
+          echo "tag_name=$tag_name" >> $GITHUB_ENV
       - name: Install cross
         uses: taiki-e/install-action@cross
       - name: Cache
@@ -213,5 +231,7 @@ jobs:
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ env.tag }}
+          name: ${{ env.tag_name }}-${{ env.date }}
+          tag_name: ${{ env.tag_name }}
+          target_commitish: ${{ env.hash }}
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
