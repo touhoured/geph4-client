@@ -98,6 +98,7 @@ jobs:
       #     latest: true
       #     fileName: WinDivert*A*.zip
       - name: Use 64 Bit WinDivert
+        shell: bash
         run: |
           wget https://github.com/basil00/Divert/releases/download/v2.2.2/WinDivert-2.2.2-A.zip
           unzip WinDivert-2.2.2-A.zip
