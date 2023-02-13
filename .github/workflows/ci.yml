@@ -148,13 +148,9 @@ jobs:
           echo "full_hash=$full_hash" >> $GITHUB_ENV
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
-      - name: fix musl gcc
+      - name: add musl tools
         run: |
-          # cd /usr/bin
-          # sudo ln -s musl-gcc aarch64-linux-musl-gcc
           sudo apt install musl-tools
-          # sudo apt install libssl-dev pkg-config
-          # export RUSTFLAGS="-C link-arg=-lgcc -Clink-arg=-static-libgcc"
       - name: Install Cross
         uses: taiki-e/install-action@cross
       - name: Cache Rust
