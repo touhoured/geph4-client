@@ -161,9 +161,9 @@ jobs:
           echo "full_hash=$full_hash" >> $GITHUB_ENV
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
-      - name: add musl tools
-        run: |
-          sudo apt install musl-tools
+      # - name: Add Musl Tools
+      #   run: |
+      #     sudo apt install musl-tools
       - name: Install Cross
         uses: taiki-e/install-action@cross
       # - name: Cache Rust
