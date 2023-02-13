@@ -151,7 +151,7 @@ jobs:
       - name: fix musl gcc
         run: |
           cd /usr/bin
-          ln -s musl-gcc aarch64-linux-musl-gcc
+          sudo ln -s musl-gcc aarch64-linux-musl-gcc
       - name: Install Cross
         uses: taiki-e/install-action@cross
       - name: Cache Rust
