@@ -101,7 +101,7 @@ jobs:
       - name: Use 64 Bit WinDivert
         shell: bash
         run: |
-          curl https://github.com/basil00/Divert/releases/download/v2.2.2/WinDivert-2.2.2-A.zip -o WinDivert.zip
+          curl -L https://github.com/basil00/Divert/releases/download/v2.2.2/WinDivert-2.2.2-A.zip -o WinDivert.zip
           unzip WinDivert.zip
           ls -lha WinDivert*/**
           pwd
