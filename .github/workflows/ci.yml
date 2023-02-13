@@ -91,6 +91,19 @@ jobs:
           echo "full_hash=$full_hash" >> $GITHUB_ENV
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
+      # - name: Download 64 Bit WinDivert
+      #   uses: robinraju/release-downloader@v1.7
+      #   with:
+      #     repository: basil00/Divert
+      #     latest: true
+      #     fileName: WinDivert*A*.zip
+      - name: Use 64 Bit WinDivert
+        run: |
+          wget https://github.com/basil00/Divert/releases/download/v2.2.2/WinDivert-2.2.2-A.zip
+          unzip WinDivert-2.2.2-A.zip
+          ls -lha WinDivert*/**
+          pwd
+          ls -lha
       - name: Cache Rust
         if: inputs.skip_cache != true
         uses: Swatinem/rust-cache@v1
@@ -207,9 +220,9 @@ jobs:
           hash=$(git log --pretty=format:%h -n 1 --all)
           full_hash=$(git log --pretty=format:%H -n 1 --all)
           tag_name=$(git describe --tags)
+          echo "date=$date" >> $GITHUB_ENV
           echo "hash=$hash" >> $GITHUB_ENV
           echo "full_hash=$full_hash" >> $GITHUB_ENV
-          echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
       - name: Install Cross
         uses: taiki-e/install-action@cross
