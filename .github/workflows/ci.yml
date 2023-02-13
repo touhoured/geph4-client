@@ -31,8 +31,8 @@ on:
         required: false
         default: false
         type: boolean
-      reset_hash:
-        description: "Reset to Hash"
+      reset_head:
+        description: "Reset to Head"
         required: false
         type: string
 env:
@@ -78,8 +78,8 @@ jobs:
       - name: Reset Latest Tag
         run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to input ref
-        if: inputs.reset_hash != null
-        run: git reset --hard ${{ inputs.reset_hash }}
+        if: inputs.reset_head != null
+        run: git reset --hard ${{ inputs.reset_head }}
       - name: Get Version
         shell: bash
         run: |
@@ -135,8 +135,8 @@ jobs:
       - name: Reset Latest Tag
         run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to input ref
-        if: inputs.reset_hash != null
-        run: git reset --hard ${{ inputs.reset_hash }}
+        if: inputs.reset_head != null
+        run: git reset --hard ${{ inputs.reset_head }}
       - name: Get version
         shell: bash
         run: |
@@ -195,8 +195,8 @@ jobs:
       - name: Reset Latest Tag
         run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to input ref
-        if: inputs.reset_hash != null
-        run: git reset --hard ${{ inputs.reset_hash }}
+        if: inputs.reset_head != null
+        run: git reset --hard ${{ inputs.reset_head }}
       - name: Get version
         shell: bash
         run: |
