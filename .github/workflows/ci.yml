@@ -6,11 +6,11 @@ on:
     - cron: "0 6 * * *"
   workflow_dispatch:
     inputs:
-      skip_cache:
-        description: "Skip Cache"
-        required: false
-        default: true
-        type: boolean
+      # skip_cache:
+      #   description: "Skip Cache"
+      #   required: false
+      #   default: true
+      #   type: boolean
       skip_sync:
         description: "Skip Sync"
         required: false
@@ -136,8 +136,8 @@ jobs:
         target:
           # - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
-          - aarch64-unknown-linux-musl
           - armv7-unknown-linux-musleabihf
+          - aarch64-unknown-linux-musl
     env:
       bin: geph4-client
       upstream: geph-official/geph4-client
