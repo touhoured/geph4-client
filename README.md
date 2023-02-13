@@ -6,4 +6,4 @@ Build the latest version automatically every day.
 # About Windows
 Please put the corresponding version of [WinDivert](https://github.com/basil00/Divert) in the same directory.
 
-请把对应版本的[WinDivert](https://github.com/basil00/Divert)放在同目录中.
+请把对应版本的[WinDivert](https://github.com/basil00/Divert)放在同目录中。
