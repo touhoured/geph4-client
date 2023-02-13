@@ -99,13 +99,13 @@ jobs:
       #     latest: true
       #     fileName: WinDivert*A*.zip
       - name: Use 64 Bit WinDivert
+        if: matrix.target == 'x86_64-pc-windows-msvc'
         shell: bash
         run: |
-          curl -L https://github.com/basil00/Divert/releases/download/v2.2.2/WinDivert-2.2.2-A.zip -o WinDivert.zip
-          unzip WinDivert.zip
-          ls -lha WinDivert*/**
-          pwd
-          ls -lha
+          curl -OL https://github.com/basil00/Divert/releases/download/v2.2.2/WinDivert-2.2.2-A.zip
+          unzip WinDivert-2.2.2-A.zip
+          rm windows-lib/*
+          cp WinDivert-2.2.2-A/x64/* windows-lib/
       # - name: Cache Rust
       #   if: inputs.skip_cache != true
       #   uses: Swatinem/rust-cache@v1
