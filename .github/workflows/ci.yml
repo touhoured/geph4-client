@@ -106,7 +106,7 @@ jobs:
           ls -lha
       # - name: Cache Rust
       #   if: inputs.skip_cache != true
-        uses: Swatinem/rust-cache@v1
+      #   uses: Swatinem/rust-cache@v1
       - name: Build Binary
         run: cargo build --target ${{ matrix.target }} --release
       - uses: actions/upload-artifact@v3
@@ -168,7 +168,7 @@ jobs:
         uses: taiki-e/install-action@cross
       # - name: Cache Rust
       #   if: inputs.skip_cache != true
-        uses: Swatinem/rust-cache@v1
+      #   uses: Swatinem/rust-cache@v1
       - name: Build Binary
         run: |
           cross build --target ${{ matrix.target }} --release --locked
@@ -228,7 +228,7 @@ jobs:
         uses: taiki-e/install-action@cross
       # - name: Cache Rust
       #   if: inputs.skip_cache != true
-        uses: Swatinem/rust-cache@v1
+      #   uses: Swatinem/rust-cache@v1
       - name: Cache Docker Images
         if: inputs.skip_cache != true
         uses: ScribeMD/docker-cache@0.2.7
