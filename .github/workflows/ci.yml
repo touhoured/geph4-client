@@ -6,28 +6,33 @@ on:
     - cron: "0 6 * * *"
   workflow_dispatch:
     inputs:
-      skip_sync:
-        description: "Skip sync"
+      skip_cache:
+        description: "Skip Cache"
         required: false
         default: true
         type: boolean
-      skip-build-windows:
-        description: "Skip build Windows"
+      skip_sync:
+        description: "Skip Sync"
+        required: false
+        default: true
+        type: boolean
+      skip_build_windows:
+        description: "Skip Build Windows"
         required: false
         default: false
         type: boolean
-      skip-build-linux:
-        description: "Skip build Linux"
+      skip_build_linux:
+        description: "Skip Build Linux"
         required: false
         default: false
         type: boolean
-      skip-build-android:
-        description: "Skip build Android"
+      skip_build_android:
+        description: "Skip Build Android"
         required: false
         default: false
         type: boolean
       reset_hash:
-        description: "Reset to hash"
+        description: "Reset to Hash"
         required: false
         type: string
 env:
@@ -54,9 +59,9 @@ jobs:
           git push --tags -f
 
   build-windows:
-    name: build-windows
+    name: Build Windows
     runs-on: windows-latest
-    if: inputs.skip-build-windows != true
+    if: inputs.skip_build_windows != true
     strategy:
       matrix:
         target:
@@ -70,12 +75,12 @@ jobs:
         with:
           repository: ${{ env.upstream }}
           fetch-depth: 0
-      - name: Reset latest tag
+      - name: Reset Latest Tag
         run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to input ref
         if: inputs.reset_hash != null
         run: git reset --hard ${{ inputs.reset_hash }}
-      - name: Get version
+      - name: Get Version
         shell: bash
         run: |
           date=$(date -I)
@@ -87,8 +92,9 @@ jobs:
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
       - name: Cache
+        if: inputs.skip_cache != true
         uses: Swatinem/rust-cache@v1
-      - name: build
+      - name: Build Binary
         run: cargo build --target ${{ matrix.target }} --release
       - uses: actions/upload-artifact@v3
         with:
@@ -107,16 +113,16 @@ jobs:
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
 
   build-linux:
-    name: build-linux
+    name: Build Linux
     runs-on: ubuntu-latest
-    if: inputs.skip-build-linux != true
+    if: inputs.skip_build_linux != true
     strategy:
       matrix:
         target:
           # - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
-          - aarch64-unknown-linux-musl
-          # - aarch64-linux-android
+          # - aarch64-unknown-linux-musl
+          - armv7-unknown-linux-musleabihf
     env:
       bin: geph4-client
       upstream: geph-official/geph4-client
@@ -126,7 +132,7 @@ jobs:
         with:
           repository: ${{ env.upstream }}
           fetch-depth: 0
-      - name: Reset latest tag
+      - name: Reset Latest Tag
         run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to input ref
         if: inputs.reset_hash != null
@@ -142,11 +148,12 @@ jobs:
           echo "full_hash=$full_hash" >> $GITHUB_ENV
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
-      - name: Install cross
+      - name: Install Cross
         uses: taiki-e/install-action@cross
       - name: Cache
+        if: inputs.skip_cache != true
         uses: Swatinem/rust-cache@v1
-      - name: build
+      - name: Build Binary
         run: |
           cross build --target ${{ matrix.target }} --release
       - uses: actions/upload-artifact@v3
@@ -168,9 +175,9 @@ jobs:
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
 
   build-android:
-    name: build-android
+    name: Build Android
     runs-on: ubuntu-latest
-    if: inputs.skip-build-android != true
+    if: inputs.skip_build_android != true
     strategy:
       matrix:
         target:
@@ -185,7 +192,7 @@ jobs:
         with:
           repository: ${{ env.upstream }}
           fetch-depth: 0
-      - name: Reset latest tag
+      - name: Reset Latest Tag
         run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to input ref
         if: inputs.reset_hash != null
@@ -201,16 +208,18 @@ jobs:
           echo "full_hash=$full_hash" >> $GITHUB_ENV
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
-      - name: Install cross
+      - name: Install Cross
         uses: taiki-e/install-action@cross
       - name: Cache
+        if: inputs.skip_cache != true
         uses: Swatinem/rust-cache@v1
-      - name: Cache Docker images.
+      - name: Cache
+        if: inputs.skip_cache != true Docker Images
         uses: ScribeMD/docker-cache@0.2.7
         id: cache-docker
         with:
           key: cross-${{ matrix.target }}-${{ hashFiles('cross-setup.sh') }}
-      - name: build docker
+      - name: Build docker
         if: steps.cache-docker.outputs.cache-hit != 'true'
         run: |
           # sh cross-setup.sh
@@ -224,7 +233,7 @@ jobs:
           # docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
       # - name: install cargo-ndk
       #   run: cargo install cargo-ndk
-      - name: build
+      - name: Build Binary
         run: |
           # cargo ndk -t arm64-v8a build --release
           cross build --target ${{ matrix.target }} --release
