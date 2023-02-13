@@ -77,7 +77,7 @@ jobs:
           fetch-depth: 0
       - name: Reset Latest Tag
         run: git reset --hard $(git rev-list --all --max-count=1)
-      - name: Reset to input ref
+      - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
       - name: Get Version
@@ -104,8 +104,8 @@ jobs:
           ls -lha WinDivert*/**
           pwd
           ls -lha
-      - name: Cache Rust
-        if: inputs.skip_cache != true
+      # - name: Cache Rust
+      #   if: inputs.skip_cache != true
         uses: Swatinem/rust-cache@v1
       - name: Build Binary
         run: cargo build --target ${{ matrix.target }} --release
@@ -147,7 +147,7 @@ jobs:
           fetch-depth: 0
       - name: Reset Latest Tag
         run: git reset --hard $(git rev-list --all --max-count=1)
-      - name: Reset to input ref
+      - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
       - name: Get version
@@ -166,12 +166,12 @@ jobs:
           sudo apt install musl-tools
       - name: Install Cross
         uses: taiki-e/install-action@cross
-      - name: Cache Rust
-        if: inputs.skip_cache != true
+      # - name: Cache Rust
+      #   if: inputs.skip_cache != true
         uses: Swatinem/rust-cache@v1
       - name: Build Binary
         run: |
-          cross build --target ${{ matrix.target }} --release
+          cross build --target ${{ matrix.target }} --release --locked
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}
@@ -210,7 +210,7 @@ jobs:
           fetch-depth: 0
       - name: Reset Latest Tag
         run: git reset --hard $(git rev-list --all --max-count=1)
-      - name: Reset to input ref
+      - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
       - name: Get version
@@ -226,8 +226,8 @@ jobs:
           echo "tag_name=$tag_name" >> $GITHUB_ENV
       - name: Install Cross
         uses: taiki-e/install-action@cross
-      - name: Cache Rust
-        if: inputs.skip_cache != true
+      # - name: Cache Rust
+      #   if: inputs.skip_cache != true
         uses: Swatinem/rust-cache@v1
       - name: Cache Docker Images
         if: inputs.skip_cache != true
@@ -252,7 +252,7 @@ jobs:
       - name: Build Binary
         run: |
           # cargo ndk -t arm64-v8a build --release
-          cross build --target ${{ matrix.target }} --release
+          cross build --target ${{ matrix.target }} --release --locked
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}
