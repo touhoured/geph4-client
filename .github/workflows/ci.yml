@@ -91,7 +91,7 @@ jobs:
           echo "full_hash=$full_hash" >> $GITHUB_ENV
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
-      - name: Cache
+      - name: Cache Rust
         if: inputs.skip_cache != true
         uses: Swatinem/rust-cache@v1
       - name: Build Binary
@@ -150,7 +150,7 @@ jobs:
           echo "tag_name=$tag_name" >> $GITHUB_ENV
       - name: Install Cross
         uses: taiki-e/install-action@cross
-      - name: Cache
+      - name: Cache Rust
         if: inputs.skip_cache != true
         uses: Swatinem/rust-cache@v1
       - name: Build Binary
@@ -210,11 +210,11 @@ jobs:
           echo "tag_name=$tag_name" >> $GITHUB_ENV
       - name: Install Cross
         uses: taiki-e/install-action@cross
-      - name: Cache
+      - name: Cache Rust
         if: inputs.skip_cache != true
         uses: Swatinem/rust-cache@v1
-      - name: Cache
-        if: inputs.skip_cache != true Docker Images
+      - name: Cache Docker Images
+        if: inputs.skip_cache != true
         uses: ScribeMD/docker-cache@0.2.7
         id: cache-docker
         with:
