@@ -149,7 +149,7 @@ jobs:
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
       - name: fix musl gcc
-        shell: |
+        run: |
           cd /usr/bin
           ln -s musl-gcc aarch64-linux-musl-gcc
       - name: Install Cross
