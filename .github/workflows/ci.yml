@@ -44,7 +44,6 @@ jobs:
     runs-on: ubuntu-latest
     if: inputs.skip_sync != true
     env:
-      bin: geph4-client
       upstream: geph-official/geph4-client
     steps:
       - uses: actions/checkout@v3
