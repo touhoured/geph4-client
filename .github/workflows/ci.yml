@@ -17,7 +17,7 @@ on:
         default: true
         type: boolean
       is_latest:
-        description: "Use Latest commit"
+        description: "Use Latest Commit"
         required: false
         type: boolean
       skip_build_windows:
