@@ -216,6 +216,7 @@ jobs:
           repository: ${{ env.upstream }}
           fetch-depth: 0
       - name: Reset Latest Tag
+        if: inputs.run_on_latest == true
         run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
