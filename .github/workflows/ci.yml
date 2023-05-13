@@ -16,6 +16,10 @@ on:
         required: false
         default: true
         type: boolean
+      is_latest:
+        description: "Use Latest commit"
+        required: false
+        type: boolean
       skip_build_windows:
         description: "Skip Build Windows"
         required: false
@@ -33,10 +37,6 @@ on:
         type: boolean
       reset_head:
         description: "Reset to Head"
-        required: false
-        type: string
-      is_latest:
-        description: "Use Latest commit"
         required: false
         type: string
 env:
