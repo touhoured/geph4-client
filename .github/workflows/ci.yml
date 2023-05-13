@@ -89,8 +89,8 @@ jobs:
         shell: bash
         run: |
           date=$(date -I)
-          hash=$(git log --pretty=format:%h -n 1 --all)
-          full_hash=$(git log --pretty=format:%H -n 1 --all)
+          hash=$(git log --pretty=format:%h -n 1)
+          full_hash=$(git log --pretty=format:%H -n 1)
           tag_name=$(git describe --tags)
           echo "hash=$hash" >> $GITHUB_ENV
           echo "full_hash=$full_hash" >> $GITHUB_ENV
@@ -161,8 +161,8 @@ jobs:
         shell: bash
         run: |
           date=$(date -I)
-          hash=$(git log --pretty=format:%h -n 1 --all)
-          full_hash=$(git log --pretty=format:%H -n 1 --all)
+          hash=$(git log --pretty=format:%h -n 1)
+          full_hash=$(git log --pretty=format:%H -n 1)
           tag_name=$(git describe --tags)
           echo "hash=$hash" >> $GITHUB_ENV
           echo "full_hash=$full_hash" >> $GITHUB_ENV
@@ -225,8 +225,8 @@ jobs:
         shell: bash
         run: |
           date=$(date -I)
-          hash=$(git log --pretty=format:%h -n 1 --all)
-          full_hash=$(git log --pretty=format:%H -n 1 --all)
+          hash=$(git log --pretty=format:%h -n 1)
+          full_hash=$(git log --pretty=format:%H -n 1)
           tag_name=$(git describe --tags)
           echo "date=$date" >> $GITHUB_ENV
           echo "hash=$hash" >> $GITHUB_ENV
