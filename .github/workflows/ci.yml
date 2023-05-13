@@ -35,6 +35,10 @@ on:
         description: "Reset to Head"
         required: false
         type: string
+      is_latest:
+        description: "Use Latest commit"
+        required: false
+        type: string
 env:
   CARGO_TERM_COLOR: always
 
@@ -76,6 +80,7 @@ jobs:
           repository: ${{ env.upstream }}
           fetch-depth: 0
       - name: Reset Latest Tag
+        if: inputs.is_latest == true
         run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
