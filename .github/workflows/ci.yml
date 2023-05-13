@@ -185,7 +185,7 @@ jobs:
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: |
-          7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
+          tar -zcvf ${{ env.bin }}-${{ matrix.target }}.tar.gz ${{ env.bin }}
       - name: Get tag
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
@@ -194,7 +194,7 @@ jobs:
           name: ${{ env.tag_name }}
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.tar.gz
 
   build-android:
     name: Build Android
@@ -266,7 +266,7 @@ jobs:
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: |
-          7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
+          tar -zcvf ${{ env.bin }}-${{ matrix.target }}.tar.gz ${{ env.bin }}
       - name: Get tag
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
@@ -275,4 +275,4 @@ jobs:
           name: ${{ env.tag_name }}
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.tar.gz
