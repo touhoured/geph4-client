@@ -16,8 +16,8 @@ on:
         required: false
         default: true
         type: boolean
-      is_latest:
-        description: "Use Latest Commit"
+      run_on_latest:
+        description: "Run on Latest Commit"
         required: false
         type: boolean
       skip_build_windows:
@@ -80,7 +80,7 @@ jobs:
           repository: ${{ env.upstream }}
           fetch-depth: 0
       - name: Reset Latest Tag
-        if: inputs.is_latest == true
+        if: inputs.run_on_latest == true
         run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
@@ -152,6 +152,7 @@ jobs:
           repository: ${{ env.upstream }}
           fetch-depth: 0
       - name: Reset Latest Tag
+        if: inputs.run_on_latest == true
         run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
