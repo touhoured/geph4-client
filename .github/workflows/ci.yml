@@ -16,10 +16,10 @@ on:
         required: false
         default: true
         type: boolean
-      run_on_latest:
-        description: "Run on Latest Commit"
-        required: false
-        type: boolean
+#       run_on_latest:
+#         description: "Run on Latest Commit"
+#         required: false
+#         type: boolean
       skip_build_windows:
         description: "Skip Build Windows"
         required: false
@@ -79,9 +79,6 @@ jobs:
         with:
           repository: ${{ env.upstream }}
           fetch-depth: 0
-      - name: Reset Latest Tag
-        if: inputs.run_on_latest == true
-        run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
@@ -96,12 +93,6 @@ jobs:
           echo "full_hash=$full_hash" >> $GITHUB_ENV
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
-      # - name: Download 64 Bit WinDivert
-      #   uses: robinraju/release-downloader@v1.7
-      #   with:
-      #     repository: basil00/Divert
-      #     latest: true
-      #     fileName: WinDivert*A*.zip
       - name: Use 64 Bit WinDivert
         if: matrix.target == 'x86_64-pc-windows-msvc'
         shell: bash
@@ -110,9 +101,6 @@ jobs:
           unzip WinDivert-2.2.2-A.zip
           rm windows-lib/*
           cp WinDivert-2.2.2-A/x64/* windows-lib/
-      # - name: Cache Rust
-      #   if: inputs.skip_cache != true
-      #   uses: Swatinem/rust-cache@v1
       - name: Build Binary
         run: cargo build --target ${{ matrix.target }} --release
       - uses: actions/upload-artifact@v3
@@ -122,7 +110,7 @@ jobs:
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: |
-          7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
+          7z a -mx=9 ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
@@ -138,7 +126,6 @@ jobs:
     strategy:
       matrix:
         target:
-          # - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
           - armv7-unknown-linux-musleabihf
           - aarch64-unknown-linux-musl
@@ -151,9 +138,6 @@ jobs:
         with:
           repository: ${{ env.upstream }}
           fetch-depth: 0
-      - name: Reset Latest Tag
-        if: inputs.run_on_latest == true
-        run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
@@ -168,14 +152,8 @@ jobs:
           echo "full_hash=$full_hash" >> $GITHUB_ENV
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
-      # - name: Add Musl Tools
-      #   run: |
-      #     sudo apt install musl-tools
       - name: Install Cross
         uses: taiki-e/install-action@cross
-      # - name: Cache Rust
-      #   if: inputs.skip_cache != true
-      #   uses: Swatinem/rust-cache@v1
       - name: Build Binary
         run: |
           cross build --target ${{ matrix.target }} --release --locked
@@ -186,7 +164,7 @@ jobs:
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: |
-          tar -zcvf ${{ env.bin }}-${{ matrix.target }}.tar.gz ${{ env.bin }}
+          tar -vcJf ${{ env.bin }}-${{ matrix.target }}.tar.xz ${{ env.bin }}
       - name: Get tag
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
@@ -195,7 +173,7 @@ jobs:
           name: ${{ env.tag_name }}
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.tar.gz
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.tar.xz
 
   build-android:
     name: Build Android
@@ -215,9 +193,6 @@ jobs:
         with:
           repository: ${{ env.upstream }}
           fetch-depth: 0
-      - name: Reset Latest Tag
-        if: inputs.run_on_latest == true
-        run: git reset --hard $(git rev-list --all --max-count=1)
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
@@ -234,9 +209,6 @@ jobs:
           echo "tag_name=$tag_name" >> $GITHUB_ENV
       - name: Install Cross
         uses: taiki-e/install-action@cross
-      # - name: Cache Rust
-      #   if: inputs.skip_cache != true
-      #   uses: Swatinem/rust-cache@v1
       - name: Cache Docker Images
         if: inputs.skip_cache != true
         uses: ScribeMD/docker-cache@0.2.7
@@ -255,8 +227,6 @@ jobs:
             --build-arg ANDROID_VERSION=5.0.0_r1 \
             --tag local
           # docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
-      # - name: install cargo-ndk
-      #   run: cargo install cargo-ndk
       - name: Build Binary
         run: |
           # cargo ndk -t arm64-v8a build --release
@@ -268,7 +238,7 @@ jobs:
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: |
-          tar -zcvf ${{ env.bin }}-${{ matrix.target }}.tar.gz ${{ env.bin }}
+          tar -vcJf ${{ env.bin }}-${{ matrix.target }}.tar.xz ${{ env.bin }}
       - name: Get tag
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
@@ -277,4 +247,4 @@ jobs:
           name: ${{ env.tag_name }}
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.tar.gz
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.tar.xz
