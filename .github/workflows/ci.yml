@@ -94,7 +94,7 @@ jobs:
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
 
-      - name: Use 64 Bit WinDivert
+      - name: Use 64-bit WinDivert
         if: matrix.target == 'x86_64-pc-windows-msvc'
         shell: bash
         run: |
