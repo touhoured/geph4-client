@@ -110,7 +110,7 @@ jobs:
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: |
-          7z a -mx=9 ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
+          7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
@@ -164,7 +164,7 @@ jobs:
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: |
-          tar -vcJf ${{ env.bin }}-${{ matrix.target }}.tar.xz ${{ env.bin }}
+          tar -vcaf ${{ env.bin }}-${{ matrix.target }}.tar.xz ${{ env.bin }}
       - name: Get tag
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
@@ -238,7 +238,7 @@ jobs:
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: |
-          tar -vcJf ${{ env.bin }}-${{ matrix.target }}.tar.xz ${{ env.bin }}
+          tar -vcaf ${{ env.bin }}-${{ matrix.target }}.tar.xz ${{ env.bin }}
       - name: Get tag
         run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
       - name: Releases
