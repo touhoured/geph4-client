@@ -112,7 +112,7 @@ jobs:
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: 7z a ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.7z ${{ env.bin }}
-      - name: Releases
+      - name: Release
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ env.tag_name }}
@@ -178,7 +178,7 @@ jobs:
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: tar -vcaf ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz ${{ env.bin }}
-      - name: Releases
+      - name: Release
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ env.tag_name }}
@@ -261,7 +261,7 @@ jobs:
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
         run: tar -vcaf ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz ${{ env.bin }}
-      - name: Releases
+      - name: Release
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ env.tag_name }}
