@@ -126,6 +126,7 @@ jobs:
       - name: Release daily
         uses: softprops/action-gh-release@v1
         with:
+          prerelease: true
           name: daily
           tag_name: daily
           target_commitish: ${{ env.full_hash }}
@@ -191,6 +192,7 @@ jobs:
       - name: Release daily
         uses: softprops/action-gh-release@v1
         with:
+          prerelease: true
           name: daily
           tag_name: daily
           target_commitish: ${{ env.full_hash }}
@@ -273,6 +275,7 @@ jobs:
       - name: Release daily
         uses: softprops/action-gh-release@v1
         with:
+          prerelease: true
           name: daily
           tag_name: daily
           target_commitish: ${{ env.full_hash }}
