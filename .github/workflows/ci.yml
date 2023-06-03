@@ -93,6 +93,7 @@ jobs:
           echo "full_hash=$full_hash" >> $GITHUB_ENV
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
+
       - name: Use 64 Bit WinDivert
         if: matrix.target == 'x86_64-pc-windows-msvc'
         shell: bash
@@ -107,10 +108,10 @@ jobs:
         with:
           name: ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}
           path: target/${{ matrix.target }}/release/${{ env.bin }}
+
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
-        run: |
-          7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
+        run: 7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
@@ -118,13 +119,17 @@ jobs:
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
+
+      - name: rename
+        working-directory: target/${{ matrix.target }}/release
+        run: cp geph4-client ${{ env.bin }}-${{ matrix.target }}
       - name: daily build
         uses: softprops/action-gh-release@v1
         with:
           name: daily
           tag_name: daily
           target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}
 
   build-linux:
     name: Build Linux
@@ -159,6 +164,7 @@ jobs:
           echo "full_hash=$full_hash" >> $GITHUB_ENV
           echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
+
       - name: Install Cross
         uses: taiki-e/install-action@cross
       - name: Build Binary
@@ -168,12 +174,10 @@ jobs:
         with:
           name: ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}
           path: target/${{ matrix.target }}/release/${{ env.bin }}
+
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
-        run: |
-          tar -vcaf ${{ env.bin }}-${{ matrix.target }}.tar.xz ${{ env.bin }}
-      - name: Get tag
-        run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
+        run: tar -vcaf ${{ env.bin }}-${{ matrix.target }}.tar.xz ${{ env.bin }}
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
@@ -181,13 +185,17 @@ jobs:
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.tar.xz
+
+      - name: rename
+        working-directory: target/${{ matrix.target }}/release
+        run: cp geph4-client ${{ env.bin }}-${{ matrix.target }}
       - name: daily build
         uses: softprops/action-gh-release@v1
         with:
           name: daily
           tag_name: daily
           target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}
 
   build-android:
     name: Build Android
@@ -221,6 +229,7 @@ jobs:
           echo "hash=$hash" >> $GITHUB_ENV
           echo "full_hash=$full_hash" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
+
       - name: Install Cross
         uses: taiki-e/install-action@cross
       - name: Cache Docker Images
@@ -245,16 +254,14 @@ jobs:
         run: |
           # cargo ndk -t arm64-v8a build --release
           cross build --target ${{ matrix.target }} --release --locked
+
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}
           path: target/${{ matrix.target }}/release/${{ env.bin }}
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
-        run: |
-          tar -vcaf ${{ env.bin }}-${{ matrix.target }}.tar.xz ${{ env.bin }}
-      - name: Get tag
-        run: echo "tag=$(git describe --tags)" >> $GITHUB_ENV
+        run: tar -vcaf ${{ env.bin }}-${{ matrix.target }}.tar.xz ${{ env.bin }}
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
@@ -262,10 +269,14 @@ jobs:
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.tar.xz
+
+      - name: rename
+        working-directory: target/${{ matrix.target }}/release
+        run: cp geph4-client ${{ env.bin }}-${{ matrix.target }}
       - name: daily build
         uses: softprops/action-gh-release@v1
         with:
           name: daily
           tag_name: daily
           target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}
