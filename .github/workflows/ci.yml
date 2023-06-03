@@ -122,14 +122,14 @@ jobs:
 
       - name: Naming
         working-directory: target/${{ matrix.target }}/release
-        run: cp geph4-client ${{ env.bin }}-${{ matrix.target }}
+        run: cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}.exe
       - name: Release daily
         uses: softprops/action-gh-release@v1
         with:
           name: daily
           tag_name: daily
           target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.exe
 
   build-linux:
     name: Build Linux
@@ -187,7 +187,7 @@ jobs:
 
       - name: Naming
         working-directory: target/${{ matrix.target }}/release
-        run: cp geph4-client ${{ env.bin }}-${{ matrix.target }}
+        run: cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}
       - name: Release daily
         uses: softprops/action-gh-release@v1
         with:
@@ -269,7 +269,7 @@ jobs:
 
       - name: Naming
         working-directory: target/${{ matrix.target }}/release
-        run: cp geph4-client ${{ env.bin }}-${{ matrix.target }}
+        run: cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}
       - name: Release daily
         uses: softprops/action-gh-release@v1
         with:
