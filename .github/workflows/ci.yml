@@ -82,7 +82,7 @@ jobs:
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
-      - name: Get Version
+      - name: Get version
         shell: bash
         run: |
           date=$(date -I)
@@ -102,7 +102,7 @@ jobs:
           unzip WinDivert-2.2.2-A.zip
           rm windows-lib/*
           cp WinDivert-2.2.2-A/x64/* windows-lib/
-      - name: Build Binary
+      - name: Build binary
         run: cargo build --target ${{ matrix.target }} --release
       - uses: actions/upload-artifact@v3
         with:
@@ -120,10 +120,10 @@ jobs:
           target_commitish: ${{ env.full_hash }}
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
 
-      - name: rename
+      - name: Naming
         working-directory: target/${{ matrix.target }}/release
         run: cp geph4-client ${{ env.bin }}-${{ matrix.target }}
-      - name: daily build
+      - name: Release daily
         uses: softprops/action-gh-release@v1
         with:
           name: daily
@@ -167,9 +167,8 @@ jobs:
 
       - name: Install Cross
         uses: taiki-e/install-action@cross
-      - name: Build Binary
-        run: |
-          cross build --target ${{ matrix.target }} --release --locked
+      - name: Build binary
+        run: cross build --target ${{ matrix.target }} --release --locked
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}
@@ -186,10 +185,10 @@ jobs:
           target_commitish: ${{ env.full_hash }}
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.tar.xz
 
-      - name: rename
+      - name: Naming
         working-directory: target/${{ matrix.target }}/release
         run: cp geph4-client ${{ env.bin }}-${{ matrix.target }}
-      - name: daily build
+      - name: Release daily
         uses: softprops/action-gh-release@v1
         with:
           name: daily
@@ -225,9 +224,9 @@ jobs:
           hash=$(git log --pretty=format:%h -n 1)
           full_hash=$(git log --pretty=format:%H -n 1)
           tag_name=$(git describe --tags)
-          echo "date=$date" >> $GITHUB_ENV
           echo "hash=$hash" >> $GITHUB_ENV
           echo "full_hash=$full_hash" >> $GITHUB_ENV
+          echo "date=$date" >> $GITHUB_ENV
           echo "tag_name=$tag_name" >> $GITHUB_ENV
 
       - name: Install Cross
@@ -250,10 +249,8 @@ jobs:
             --build-arg ANDROID_VERSION=5.0.0_r1 \
             --tag local
           # docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
-      - name: Build Binary
-        run: |
-          # cargo ndk -t arm64-v8a build --release
-          cross build --target ${{ matrix.target }} --release --locked
+      - name: Build binary
+        run: cross build --target ${{ matrix.target }} --release --locked
 
       - uses: actions/upload-artifact@v3
         with:
@@ -270,10 +267,10 @@ jobs:
           target_commitish: ${{ env.full_hash }}
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.tar.xz
 
-      - name: rename
+      - name: Naming
         working-directory: target/${{ matrix.target }}/release
         run: cp geph4-client ${{ env.bin }}-${{ matrix.target }}
-      - name: daily build
+      - name: Release daily
         uses: softprops/action-gh-release@v1
         with:
           name: daily
