@@ -111,14 +111,14 @@ jobs:
 
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
-        run: 7z a ${{ env.bin }}-${{ matrix.target }}.7z ${{ env.bin }}
+        run: 7z a ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.7z ${{ env.bin }}
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ env.tag_name }}
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.7z
 
       - name: Naming
         working-directory: target/${{ matrix.target }}/release
@@ -176,14 +176,14 @@ jobs:
 
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
-        run: tar -vcaf ${{ env.bin }}-${{ matrix.target }}.tar.xz ${{ env.bin }}
+        run: tar -vcaf ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz ${{ env.bin }}
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ env.tag_name }}
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.tar.xz
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz
 
       - name: Naming
         working-directory: target/${{ matrix.target }}/release
@@ -258,14 +258,14 @@ jobs:
           path: target/${{ matrix.target }}/release/${{ env.bin }}
       - name: Compression
         working-directory: target/${{ matrix.target }}/release
-        run: tar -vcaf ${{ env.bin }}-${{ matrix.target }}.tar.xz ${{ env.bin }}
+        run: tar -vcaf ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz ${{ env.bin }}
       - name: Releases
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ env.tag_name }}
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.tar.xz
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz
 
       - name: Naming
         working-directory: target/${{ matrix.target }}/release
