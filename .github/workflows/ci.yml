@@ -118,6 +118,13 @@ jobs:
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
+      - name: daily build
+        uses: softprops/action-gh-release@v1
+        with:
+          name: daily
+          tag_name: daily
+          target_commitish: ${{ env.full_hash }}
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
 
   build-linux:
     name: Build Linux
@@ -174,6 +181,13 @@ jobs:
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.tar.xz
+      - name: daily build
+        uses: softprops/action-gh-release@v1
+        with:
+          name: daily
+          tag_name: daily
+          target_commitish: ${{ env.full_hash }}
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
 
   build-android:
     name: Build Android
@@ -248,3 +262,10 @@ jobs:
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.tar.xz
+      - name: daily build
+        uses: softprops/action-gh-release@v1
+        with:
+          name: daily
+          tag_name: daily
+          target_commitish: ${{ env.full_hash }}
+          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.7z
