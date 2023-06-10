@@ -280,3 +280,5 @@ jobs:
       hash: ${{ needs.common.outputs.hash }}
       full_hash: ${{ needs.common.outputs.full_hash }}
       tag_name: ${{ needs.common.outputs.tag_name }}
+    steps:
+      - run: ls
