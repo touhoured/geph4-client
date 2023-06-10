@@ -286,4 +286,20 @@ jobs:
 
       - name: Compressed file
         run: |
-          ls -R
+          for path in *; do
+          if [[ "$path" == *"linux"* || "$path" == *"android"* ]]; then
+            tar -caf "${path}.tar.xz" "$path"
+          elif [[ "$path" == *"windows"* ]]; then
+            7z a "${path}.7z" "$path"
+          fi
+          done
+      
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ env.tag_name }}
+          tag_name: ${{ env.tag_name }}
+          target_commitish: ${{ env.full_hash }}
+          files: |
+            *.tar.xz
+            *.7z
