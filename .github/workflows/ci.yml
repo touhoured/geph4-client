@@ -92,22 +92,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          repository: ${{ env.upstream }}
-          fetch-depth: 0
+          ref: master
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
-      - name: Get version
-        shell: bash
-        run: |
-          date=$(date -I)
-          hash=$(git log --pretty=format:%h -n 1)
-          full_hash=$(git log --pretty=format:%H -n 1)
-          tag_name=$(git describe --tags)
-          echo "hash=$hash" >> $GITHUB_ENV
-          echo "full_hash=$full_hash" >> $GITHUB_ENV
-          echo "date=$date" >> $GITHUB_ENV
-          echo "tag_name=$tag_name" >> $GITHUB_ENV
 
       - name: Use 64-bit WinDivert
         if: matrix.target == 'x86_64-pc-windows-msvc'
@@ -168,22 +156,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          repository: ${{ env.upstream }}
-          fetch-depth: 0
+          ref: master
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
-      - name: Get version
-        shell: bash
-        run: |
-          date=$(date -I)
-          hash=$(git log --pretty=format:%h -n 1)
-          full_hash=$(git log --pretty=format:%H -n 1)
-          tag_name=$(git describe --tags)
-          echo "hash=$hash" >> $GITHUB_ENV
-          echo "full_hash=$full_hash" >> $GITHUB_ENV
-          echo "date=$date" >> $GITHUB_ENV
-          echo "tag_name=$tag_name" >> $GITHUB_ENV
 
       - name: Install Cross
         uses: taiki-e/install-action@cross
@@ -237,22 +213,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          repository: ${{ env.upstream }}
-          fetch-depth: 0
+          ref: master
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
-      - name: Get version
-        shell: bash
-        run: |
-          date=$(date -I)
-          hash=$(git log --pretty=format:%h -n 1)
-          full_hash=$(git log --pretty=format:%H -n 1)
-          tag_name=$(git describe --tags)
-          echo "hash=$hash" >> $GITHUB_ENV
-          echo "full_hash=$full_hash" >> $GITHUB_ENV
-          echo "date=$date" >> $GITHUB_ENV
-          echo "tag_name=$tag_name" >> $GITHUB_ENV
 
       - name: Install Cross
         uses: taiki-e/install-action@cross
