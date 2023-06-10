@@ -41,25 +41,32 @@ on:
         type: string
 env:
   CARGO_TERM_COLOR: always
+  upstream: geph-official/geph4-client
 
 jobs:
-  sync:
-    name: Sync
+  common:
+    name: common
     runs-on: ubuntu-latest
-    if: inputs.skip_sync != true
-    env:
-      upstream: geph-official/geph4-client
     steps:
       - uses: actions/checkout@v3
         with:
           ref: master
-      - name: Sync
+
+      - name: Reset to Input HEAD
+        if: inputs.reset_head != null
+        run: git reset --hard ${{ inputs.reset_head }}
+
+      - name: Get environment variable
+        shell: bash
         run: |
-          git remote add upstream https://github.com/$upstream.git
-          git fetch upstream
-          git reset --hard $(git log --all --pretty=format:'%H' -n 1)
-          git push -f
-          git push --tags -f
+          date=$(date -I)
+          hash=$(git log --pretty=format:%h -n 1)
+          full_hash=$(git log --pretty=format:%H -n 1)
+          tag_name=$(git describe --tags)
+          echo "hash=$hash" >> $GITHUB_ENV
+          echo "full_hash=$full_hash" >> $GITHUB_ENV
+          echo "date=$date" >> $GITHUB_ENV
+          echo "tag_name=$tag_name" >> $GITHUB_ENV
 
   build-windows:
     name: Build Windows
@@ -72,7 +79,6 @@ jobs:
           - x86_64-pc-windows-msvc
     env:
       bin: geph4-client.exe
-      upstream: geph-official/geph4-client
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -144,7 +150,6 @@ jobs:
           - aarch64-unknown-linux-musl
     env:
       bin: geph4-client
-      upstream: geph-official/geph4-client
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -209,7 +214,6 @@ jobs:
           - armv7-linux-androideabi
     env:
       bin: geph4-client
-      upstream: geph-official/geph4-client
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -280,3 +284,4 @@ jobs:
           tag_name: daily
           target_commitish: ${{ env.full_hash }}
           files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}
+
