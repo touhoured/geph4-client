@@ -75,11 +75,7 @@ jobs:
           - i686-pc-windows-msvc
           - x86_64-pc-windows-msvc
     env:
-      bin: geph4-client.exe
-      date: ${{ needs.common.outputs.date }}
-      hash: ${{ needs.common.outputs.hash }}
-      full_hash: ${{ needs.common.outputs.full_hash }}
-      tag_name: ${{ needs.common.outputs.tag_name }}
+      bin: geph4-client
 
     steps:
       - name: Checkout
@@ -104,8 +100,8 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}
-          path: target/${{ matrix.target }}/release/${{ env.bin }}
+          name: ${{ env.bin }}-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/${{ env.bin }}.exe
 
       # - name: Compression
       #   working-directory: target/${{ matrix.target }}/release
@@ -143,16 +139,13 @@ jobs:
           - aarch64-unknown-linux-musl
     env:
       bin: geph4-client
-      date: ${{ needs.common.outputs.date }}
-      hash: ${{ needs.common.outputs.hash }}
-      full_hash: ${{ needs.common.outputs.full_hash }}
-      tag_name: ${{ needs.common.outputs.tag_name }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           ref: master
+
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
@@ -164,7 +157,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}
+          name: ${{ env.bin }}-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/${{ env.bin }}
 
       # - name: Compression
@@ -202,27 +195,26 @@ jobs:
           - armv7-linux-androideabi
     env:
       bin: geph4-client
-      date: ${{ needs.common.outputs.date }}
-      hash: ${{ needs.common.outputs.hash }}
-      full_hash: ${{ needs.common.outputs.full_hash }}
-      tag_name: ${{ needs.common.outputs.tag_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           ref: master
+
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
 
       - name: Install Cross
         uses: taiki-e/install-action@cross
+
       - name: Cache Docker Images
         if: inputs.skip_cache != true
         uses: ScribeMD/docker-cache@0.2.7
         id: cache-docker
         with:
           key: cross-${{ matrix.target }}-${{ hashFiles('cross-setup.sh') }}
+
       - name: Build docker
         if: steps.cache-docker.outputs.cache-hit != 'true'
         run: |
@@ -235,12 +227,13 @@ jobs:
             --build-arg ANDROID_VERSION=5.0.0_r1 \
             --tag local
           # docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
+
       - name: Build binary
         run: cross build --target ${{ matrix.target }} --release --locked
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}
+          name: ${{ env.bin }}-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/${{ env.bin }}
 
       # - name: Compression
@@ -276,8 +269,6 @@ jobs:
       - build-android
     env:
       bin: geph4-client
-      date: ${{ needs.common.outputs.date }}
-      hash: ${{ needs.common.outputs.hash }}
       full_hash: ${{ needs.common.outputs.full_hash }}
       tag_name: ${{ needs.common.outputs.tag_name }}
     steps:
@@ -287,13 +278,20 @@ jobs:
       - name: Compressed file
         run: |
           for path in *; do
-          if [[ "$path" == *"linux"* || "$path" == *"android"* ]]; then
-            tar -caf "${path}.tar.xz" "$path"
-          elif [[ "$path" == *"windows"* ]]; then
-            7z a "${path}.7z" "$path"
+            if [[ "$path" == *"linux"* || "$path" == *"android"* ]]; then
+              tar -caf "${path}-${env.tag_name}.tar.xz" "$path"
+            elif [[ "$path" == *"windows"* ]]; then
+              7z a "${path}-${env.tag_name}.7z" "$path"
           fi
           done
-      
+
+      - name: Compressed file
+        run: |
+          for path in */*; do
+            dirname=$(basename $path)
+            echo $dirname
+          done
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
@@ -303,3 +301,5 @@ jobs:
           files: |
             *.tar.xz
             *.7z
+      
+      - name: Pre-Release
