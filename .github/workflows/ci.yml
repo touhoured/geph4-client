@@ -6,20 +6,11 @@ on:
     - cron: "0 6 * * *"
   workflow_dispatch:
     inputs:
-      # skip_cache:
-      #   description: "Skip Cache"
-      #   required: false
-      #   default: true
-      #   type: boolean
       skip_sync:
         description: "Skip Sync"
         required: false
         default: true
         type: boolean
-#       run_on_latest:
-#         description: "Run on Latest Commit"
-#         required: false
-#         type: boolean
       skip_build_windows:
         description: "Skip Build Windows"
         required: false
@@ -52,11 +43,12 @@ jobs:
       hash: ${{ steps.getenv.outputs.hash }}
       full_hash: ${{ steps.getenv.outputs.full_hash }}
       tag_name: ${{ steps.getenv.outputs.tag_name }}
+
     steps:
-      - name: Checkout upstream
+      - name: Checkout
         uses: actions/checkout@v3
         with:
-          repository: ${{ env.upstream }}
+          ref: master
           fetch-depth: 0
 
       - name: Reset to Input HEAD
@@ -88,11 +80,13 @@ jobs:
       hash: ${{ needs.common.outputs.hash }}
       full_hash: ${{ needs.common.outputs.full_hash }}
       tag_name: ${{ needs.common.outputs.tag_name }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           ref: master
+
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
@@ -107,33 +101,34 @@ jobs:
           cp WinDivert-2.2.2-A/x64/* windows-lib/
       - name: Build binary
         run: cargo build --target ${{ matrix.target }} --release
+
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}
+          name: ${{ env.bin }}-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/${{ env.bin }}
 
-      - name: Compression
-        working-directory: target/${{ matrix.target }}/release
-        run: 7z a ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.7z ${{ env.bin }}
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: ${{ env.tag_name }}
-          tag_name: ${{ env.tag_name }}
-          target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.7z
+      # - name: Compression
+      #   working-directory: target/${{ matrix.target }}/release
+      #   run: 7z a ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.7z ${{ env.bin }}
+      # - name: Release
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     name: ${{ env.tag_name }}
+      #     tag_name: ${{ env.tag_name }}
+      #     target_commitish: ${{ env.full_hash }}
+      #     files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.7z
 
-      - name: Naming
-        working-directory: target/${{ matrix.target }}/release
-        run: cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}.exe
-      - name: Release daily
-        uses: softprops/action-gh-release@v1
-        with:
-          prerelease: true
-          name: daily
-          tag_name: daily
-          target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.exe
+      # - name: Naming
+      #   working-directory: target/${{ matrix.target }}/release
+      #   run: cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}.exe
+      # - name: Release daily
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     prerelease: true
+      #     name: daily
+      #     tag_name: daily
+      #     target_commitish: ${{ env.full_hash }}
+      #     files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.exe
 
   build-linux:
     name: Build Linux
@@ -152,6 +147,7 @@ jobs:
       hash: ${{ needs.common.outputs.hash }}
       full_hash: ${{ needs.common.outputs.full_hash }}
       tag_name: ${{ needs.common.outputs.tag_name }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -165,33 +161,34 @@ jobs:
         uses: taiki-e/install-action@cross
       - name: Build binary
         run: cross build --target ${{ matrix.target }} --release --locked
+
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}
+          name: ${{ env.bin }}-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/${{ env.bin }}
 
-      - name: Compression
-        working-directory: target/${{ matrix.target }}/release
-        run: tar -vcaf ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz ${{ env.bin }}
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: ${{ env.tag_name }}
-          tag_name: ${{ env.tag_name }}
-          target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz
+      # - name: Compression
+      #   working-directory: target/${{ matrix.target }}/release
+      #   run: tar -vcaf ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz ${{ env.bin }}
+      # - name: Release
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     name: ${{ env.tag_name }}
+      #     tag_name: ${{ env.tag_name }}
+      #     target_commitish: ${{ env.full_hash }}
+      #     files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz
 
-      - name: Naming
-        working-directory: target/${{ matrix.target }}/release
-        run: cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}
-      - name: Release daily
-        uses: softprops/action-gh-release@v1
-        with:
-          prerelease: true
-          name: daily
-          tag_name: daily
-          target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}
+      # - name: Naming
+      #   working-directory: target/${{ matrix.target }}/release
+      #   run: cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}
+      # - name: Release daily
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     prerelease: true
+      #     name: daily
+      #     tag_name: daily
+      #     target_commitish: ${{ env.full_hash }}
+      #     files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}
 
   build-android:
     name: Build Android
@@ -243,28 +240,43 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}
+          name: ${{ env.bin }}-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/${{ env.bin }}
-      - name: Compression
-        working-directory: target/${{ matrix.target }}/release
-        run: tar -vcaf ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz ${{ env.bin }}
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: ${{ env.tag_name }}
-          tag_name: ${{ env.tag_name }}
-          target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz
 
-      - name: Naming
-        working-directory: target/${{ matrix.target }}/release
-        run: cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}
-      - name: Release daily
-        uses: softprops/action-gh-release@v1
-        with:
-          prerelease: true
-          name: daily
-          tag_name: daily
-          target_commitish: ${{ env.full_hash }}
-          files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}
+      # - name: Compression
+      #   working-directory: target/${{ matrix.target }}/release
+      #   run: tar -vcaf ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz ${{ env.bin }}
+      # - name: Release
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     name: ${{ env.tag_name }}
+      #     tag_name: ${{ env.tag_name }}
+      #     target_commitish: ${{ env.full_hash }}
+      #     files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz
 
+      # - name: Naming
+      #   working-directory: target/${{ matrix.target }}/release
+      #   run: cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}
+      # - name: Release daily
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     prerelease: true
+      #     name: daily
+      #     tag_name: daily
+      #     target_commitish: ${{ env.full_hash }}
+      #     files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}
+
+  upload-release:
+    name: Upload file
+    runs-on: ubuntu-latest
+    needs:
+      - common
+      - build-windows
+      - build-linux
+      - build-android
+    env:
+      bin: geph4-client
+      date: ${{ needs.common.outputs.date }}
+      hash: ${{ needs.common.outputs.hash }}
+      full_hash: ${{ needs.common.outputs.full_hash }}
+      tag_name: ${{ needs.common.outputs.tag_name }}
