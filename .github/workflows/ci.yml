@@ -47,30 +47,35 @@ jobs:
   common:
     name: common
     runs-on: ubuntu-latest
+    outputs:
+      date: ${{ steps.getenv.outputs.date }}
+      hash: ${{ steps.getenv.outputs.hash }}
+      full_hash: ${{ steps.getenv.outputs.full_hash }}
+      tag_name: ${{ steps.getenv.outputs.tag_name }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout upstream
+        uses: actions/checkout@v3
         with:
-          ref: master
+          repository: ${{ env.upstream }}
+          fetch-depth: 0
 
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
 
       - name: Get environment variable
+        id: getenv
         shell: bash
         run: |
-          date=$(date -I)
-          hash=$(git log --pretty=format:%h -n 1)
-          full_hash=$(git log --pretty=format:%H -n 1)
-          tag_name=$(git describe --tags)
-          echo "hash=$hash" >> $GITHUB_ENV
-          echo "full_hash=$full_hash" >> $GITHUB_ENV
-          echo "date=$date" >> $GITHUB_ENV
-          echo "tag_name=$tag_name" >> $GITHUB_ENV
+          echo "date=$(date -I)" >> "$GITHUB_OUTPUT"
+          echo "hash=$(git log --pretty=format:%h -n 1)" >> "$GITHUB_OUTPUT"
+          echo "full_hash=$(git log --pretty=format:%H -n 1)" >> "$GITHUB_OUTPUT"
+          echo "tag_name=$(git describe --tags)" >> "$GITHUB_OUTPUT"
 
   build-windows:
     name: Build Windows
     runs-on: windows-latest
+    needs: common
     if: inputs.skip_build_windows != true
     strategy:
       matrix:
@@ -79,6 +84,10 @@ jobs:
           - x86_64-pc-windows-msvc
     env:
       bin: geph4-client.exe
+      date: ${{ needs.common.outputs.date }}
+      hash: ${{ needs.common.outputs.hash }}
+      full_hash: ${{ needs.common.outputs.full_hash }}
+      tag_name: ${{ needs.common.outputs.tag_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -141,6 +150,7 @@ jobs:
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest
+    needs: common
     if: inputs.skip_build_linux != true
     strategy:
       matrix:
@@ -150,6 +160,10 @@ jobs:
           - aarch64-unknown-linux-musl
     env:
       bin: geph4-client
+      date: ${{ needs.common.outputs.date }}
+      hash: ${{ needs.common.outputs.hash }}
+      full_hash: ${{ needs.common.outputs.full_hash }}
+      tag_name: ${{ needs.common.outputs.tag_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -206,6 +220,7 @@ jobs:
   build-android:
     name: Build Android
     runs-on: ubuntu-latest
+    needs: common
     if: inputs.skip_build_android != true
     strategy:
       matrix:
@@ -214,6 +229,10 @@ jobs:
           - armv7-linux-androideabi
     env:
       bin: geph4-client
+      date: ${{ needs.common.outputs.date }}
+      hash: ${{ needs.common.outputs.hash }}
+      full_hash: ${{ needs.common.outputs.full_hash }}
+      tag_name: ${{ needs.common.outputs.tag_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
