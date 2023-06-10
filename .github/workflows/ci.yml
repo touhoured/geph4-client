@@ -281,4 +281,9 @@ jobs:
       full_hash: ${{ needs.common.outputs.full_hash }}
       tag_name: ${{ needs.common.outputs.tag_name }}
     steps:
-      - run: ls
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+
+      - name: Compressed file
+        run: |
+          ls -R
