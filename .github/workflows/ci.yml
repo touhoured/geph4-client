@@ -57,7 +57,7 @@ jobs:
         run: |
           git remote add upstream https://github.com/$upstream.git
           git fetch upstream
-          # git reset --hard $(git log --all --pretty=format:'%H' -n 1)
+          git reset --hard $(git log --all --pretty=format:'%H' -n 1)
           git push -f
           git push --tags -f
 
