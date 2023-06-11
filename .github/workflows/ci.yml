@@ -296,6 +296,8 @@ jobs:
         uses: richardsimko/update-tag@v1
         with:
           tag_name: daily
+        env: 
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Daily
         uses: softprops/action-gh-release@v1
