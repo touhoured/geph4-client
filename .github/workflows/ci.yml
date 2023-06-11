@@ -155,7 +155,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.bin }}-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/${{ env.bin }}.exe
+          path: target/${{ matrix.target }}/release/${{ env.bin }}
 
       # - name: Compression
       #   working-directory: target/${{ matrix.target }}/release
@@ -200,7 +200,6 @@ jobs:
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
         
-
       - name: Install Cross
         uses: taiki-e/install-action@cross
 
