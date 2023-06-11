@@ -60,10 +60,10 @@ jobs:
         id: getenv
         shell: bash
         run: |
-          echo "date=$(date -I)" >> "$GITHUB_OUTPUT"
-          echo "hash=$(git log --pretty=format:%h -n 1)" >> "$GITHUB_OUTPUT"
-          echo "full_hash=$(git log --pretty=format:%H -n 1)" >> "$GITHUB_OUTPUT"
-          echo "tag_name=$(git describe --tags)" >> "$GITHUB_OUTPUT"
+          echo "date=$(date -I)" >> "${GITHUB_OUTPUT}"
+          echo "hash=$(git log --pretty=format:%h -n 1)" >> "${GITHUB_OUTPUT}"
+          echo "full_hash=$(git log --pretty=format:%H -n 1)" >> "${GITHUB_OUTPUT}"
+          echo "tag_name=$(git describe --tags)" >> "${GITHUB_OUTPUT}"
 
   build-windows:
     name: Build Windows
