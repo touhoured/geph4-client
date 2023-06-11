@@ -33,6 +33,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   upstream: geph-official/geph4-client
+  bin: geph4-client
 
 jobs:
   common:
@@ -74,8 +75,6 @@ jobs:
         target:
           - i686-pc-windows-msvc
           - x86_64-pc-windows-msvc
-    env:
-      bin: geph4-client
 
     steps:
       - name: Checkout
@@ -137,8 +136,6 @@ jobs:
           - x86_64-unknown-linux-musl
           - armv7-unknown-linux-musleabihf
           - aarch64-unknown-linux-musl
-    env:
-      bin: geph4-client
 
     steps:
       - name: Checkout
@@ -158,7 +155,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.bin }}-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/${{ env.bin }}
+          path: target/${{ matrix.target }}/release/${{ env.bin }}.exe
 
       # - name: Compression
       #   working-directory: target/${{ matrix.target }}/release
@@ -193,8 +190,6 @@ jobs:
         target:
           - aarch64-linux-android
           - armv7-linux-androideabi
-    env:
-      bin: geph4-client
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -204,6 +199,7 @@ jobs:
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
+        
 
       - name: Install Cross
         uses: taiki-e/install-action@cross
@@ -268,28 +264,24 @@ jobs:
       - build-linux
       - build-android
     env:
-      bin: geph4-client
       full_hash: ${{ needs.common.outputs.full_hash }}
       tag_name: ${{ needs.common.outputs.tag_name }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
 
-      - name: Compressed file
+      - name: Compresse and rename
         run: |
-          for path in *; do
-            if [[ "$path" == *"linux"* || "$path" == *"android"* ]]; then
-              tar -caf "${path}-${env.tag_name}.tar.xz" "$path"
-            elif [[ "$path" == *"windows"* ]]; then
-              7z a "${path}-${env.tag_name}.7z" "$path"
-          fi
-          done
-
-      - name: Compressed file
-        run: |
-          for path in */*; do
-            dirname=$(basename $path)
-            echo $dirname
+          mkdir release daily
+          for file in geph4-client*/*; do
+            dirname=$(dirname "${file}")
+            if [[ "${file}" == *"linux"* || "${file}" == *"android"* ]]; then
+              tar -vcaf "release/${dirname}.tar.xz" "${file}"
+              cp ${file} daily/${dirname}
+            elif [[ "${file}" == *"windows"* ]]; then
+              7z a "release/${dirname}.7z" "${file}"
+              cp "${file}" "daily/${dirname}.exe"
+            fi
           done
 
       - name: Release
@@ -298,8 +290,16 @@ jobs:
           name: ${{ env.tag_name }}
           tag_name: ${{ env.tag_name }}
           target_commitish: ${{ env.full_hash }}
-          files: |
-            *.tar.xz
-            *.7z
+          files: release/*
       
-      - name: Pre-Release
+      - name: Tag Repo
+        uses: richardsimko/update-tag@v1
+        with:
+          tag_name: daily
+
+      - name: Daily
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Daily
+          tag_name: daily
+          files: daily/*
