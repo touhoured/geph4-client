@@ -31,7 +31,6 @@ on:
         required: false
         type: string
 env:
-  CARGO_TERM_COLOR: always
   upstream: geph-official/geph4-client
   bin: geph4-client
 
@@ -44,7 +43,6 @@ jobs:
       hash: ${{ steps.getenv.outputs.hash }}
       full_hash: ${{ steps.getenv.outputs.full_hash }}
       tag_name: ${{ steps.getenv.outputs.tag_name }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -274,16 +272,17 @@ jobs:
       - name: Compresse and rename
         run: |
           mkdir release daily
-          for file in geph4-client*/*; do
-            dirname=$(dirname "${file}")
-            if [[ "${file}" == *"linux"* || "${file}" == *"android"* ]]; then
-              tar -vcaf "release/${dirname}.tar.xz" "${file}"
-              cp ${file} daily/${dirname}
-            elif [[ "${file}" == *"windows"* ]]; then
-              7z a "release/${dirname}.7z" "${file}"
-              cp "${file}" "daily/${dirname}.exe"
-            fi
+          for file in ${{ env.bin }}*/*; do
+              dirname=$(dirname "${file}")
+              if [[ "${file}" == *"windows"* ]]; then
+                  7z a "release/${dirname}.7z" "${file}"
+                  cp "${file}" "daily/${dirname}.exe"
+              else
+                  tar -vcaf "release/${dirname}.tar.xz" "${file}"
+                  cp ${file} daily/${dirname}
+              fi
           done
+
 
       - name: Release
         uses: softprops/action-gh-release@v1
