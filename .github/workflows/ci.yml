@@ -257,6 +257,8 @@ jobs:
   upload-release:
     name: Upload file
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs:
       - common
       - build-windows
