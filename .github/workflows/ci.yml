@@ -6,11 +6,11 @@ on:
     - cron: "0 6 * * *"
   workflow_dispatch:
     inputs:
-      skip_sync:
-        description: "Skip Sync"
-        required: false
-        default: true
-        type: boolean
+#       skip_sync:
+#         description: "Skip Sync"
+#         required: false
+#         default: true
+#         type: boolean
       skip_build_windows:
         description: "Skip Build Windows"
         required: false
