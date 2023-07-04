@@ -23,6 +23,7 @@ jobs:
         run: |
           git remote add upstream https://github.com/${upstream}.git
           git fetch upstream
+          git checkout master
           git reset --hard $(git log --pretty=format:'%H' -n 1)
           git push -f
           git push --tags -f
