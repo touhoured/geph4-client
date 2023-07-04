@@ -24,6 +24,9 @@ jobs:
           git remote add upstream https://github.com/${upstream}.git
           git fetch upstream
           git checkout upstream/master
+          git log -n 3
+          echo ------
+          git log -n 3 --all
           # git reset --hard $(git log --pretty=format:'%H' -n 1)
           git push -f
           git push --tags -f
