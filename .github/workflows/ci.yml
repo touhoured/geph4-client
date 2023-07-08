@@ -284,23 +284,35 @@ jobs:
           done
 
 
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: ${{ env.tag_name }}
-          tag_name: ${{ env.tag_name }}
-          target_commitish: ${{ env.full_hash }}
-          files: release/*
+#       - name: Release
+#         uses: softprops/action-gh-release@v1
+#         with:
+#           name: ${{ env.tag_name }}
+#           tag_name: ${{ env.tag_name }}
+#           target_commitish: ${{ env.full_hash }}
+#           files: release/*
 
-      - name: Update tag
-        uses: jimeh/update-tags-action@v1
-        with:
-          tags: daily
-          ref: ${{ env.full_hash }}
+      - name: Release and upload assets
+        run: |
+          gh release create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }} release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Daily
-        uses: softprops/action-gh-release@v1
-        with:
-          name: Daily
-          tag_name: daily
-          files: daily/*
+#       - name: Update tag
+#         uses: jimeh/update-tags-action@v1
+#         with:
+#           tags: daily
+#           ref: ${{ env.full_hash }}
+
+#       - name: Daily
+#         uses: softprops/action-gh-release@v1
+#         with:
+#           name: Daily
+#           tag_name: daily
+#           files: daily/*
+
+      - name: Release daily and upload assets
+        run: |
+          gh release create daily --target ${{ env.full_hash }} --generate-notes --latest --title Daily daily/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
