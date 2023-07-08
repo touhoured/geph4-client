@@ -313,6 +313,6 @@ jobs:
 
       - name: Release daily and upload assets
         run: |
-          gh release create daily --target ${{ env.full_hash }} --generate-notes --latest --title Daily daily/*
+          gh release create daily --target ${{ env.full_hash }} --generate-notes --prerelease --title Daily daily/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
