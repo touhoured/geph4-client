@@ -283,6 +283,10 @@ jobs:
               fi
           done
 
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: master
 
 #       - name: Release
 #         uses: softprops/action-gh-release@v1
