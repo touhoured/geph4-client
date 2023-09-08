@@ -6,11 +6,11 @@ on:
     - cron: "0 6 * * *"
   workflow_dispatch:
     inputs:
-#       skip_sync:
-#         description: "Skip Sync"
-#         required: false
-#         default: true
-#         type: boolean
+      # skip_sync:
+      #   description: "Skip Sync"
+      #   required: false
+      #   default: true
+      #   type: boolean
       skip_build_windows:
         description: "Skip Build Windows"
         required: false
@@ -38,8 +38,8 @@ jobs:
   common:
     name: common
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    # permissions:
+    #   contents: write
     outputs:
       date: ${{ steps.getenv.outputs.date }}
       hash: ${{ steps.getenv.outputs.hash }}
@@ -51,11 +51,9 @@ jobs:
         with:
           ref: master
           fetch-depth: 0
-
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
-
       - name: Get environment variable
         id: getenv
         shell: bash
@@ -75,17 +73,14 @@ jobs:
         target:
           - i686-pc-windows-msvc
           - x86_64-pc-windows-msvc
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           ref: master
-
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
-
       - name: Use 64-bit WinDivert
         if: matrix.target == 'x86_64-pc-windows-msvc'
         shell: bash
@@ -96,12 +91,10 @@ jobs:
           cp WinDivert-2.2.2-A/x64/* windows-lib/
       - name: Build binary
         run: cargo build --target ${{ matrix.target }} --release
-
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.bin }}-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/${{ env.bin }}.exe
-
       # - name: Compression
       #   working-directory: target/${{ matrix.target }}/release
       #   run: 7z a ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.7z ${{ env.bin }}
@@ -112,7 +105,6 @@ jobs:
       #     tag_name: ${{ env.tag_name }}
       #     target_commitish: ${{ env.full_hash }}
       #     files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.7z
-
       # - name: Naming
       #   working-directory: target/${{ matrix.target }}/release
       #   run: cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}.exe
@@ -136,49 +128,22 @@ jobs:
           - x86_64-unknown-linux-musl
           - armv7-unknown-linux-musleabihf
           - aarch64-unknown-linux-musl
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           ref: master
-
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
-
       - name: Install Cross
         uses: taiki-e/install-action@cross
       - name: Build binary
         run: cross build --target ${{ matrix.target }} --release --locked
-
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.bin }}-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/${{ env.bin }}
-
-      # - name: Compression
-      #   working-directory: target/${{ matrix.target }}/release
-      #   run: tar -vcaf ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz ${{ env.bin }}
-      # - name: Release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     name: ${{ env.tag_name }}
-      #     tag_name: ${{ env.tag_name }}
-      #     target_commitish: ${{ env.full_hash }}
-      #     files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz
-
-      # - name: Naming
-      #   working-directory: target/${{ matrix.target }}/release
-      #   run: cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}
-      # - name: Release daily
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     prerelease: true
-      #     name: daily
-      #     tag_name: daily
-      #     target_commitish: ${{ env.full_hash }}
-      #     files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}
 
   build-android:
     name: Build Android
@@ -195,21 +160,17 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: master
-
       - name: Reset to Input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
-        
       - name: Install Cross
         uses: taiki-e/install-action@cross
-
       - name: Cache Docker Images
         if: inputs.skip_cache != true
         uses: ScribeMD/docker-cache@0.2.7
         id: cache-docker
         with:
           key: cross-${{ matrix.target }}-${{ hashFiles('cross-setup.sh') }}
-
       - name: Build docker
         if: steps.cache-docker.outputs.cache-hit != 'true'
         run: |
@@ -222,37 +183,12 @@ jobs:
             --build-arg ANDROID_VERSION=5.0.0_r1 \
             --tag local
           # docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
-
       - name: Build binary
         run: cross build --target ${{ matrix.target }} --release --locked
-
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.bin }}-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/${{ env.bin }}
-
-      # - name: Compression
-      #   working-directory: target/${{ matrix.target }}/release
-      #   run: tar -vcaf ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz ${{ env.bin }}
-      # - name: Release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     name: ${{ env.tag_name }}
-      #     tag_name: ${{ env.tag_name }}
-      #     target_commitish: ${{ env.full_hash }}
-      #     files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.xz
-
-      # - name: Naming
-      #   working-directory: target/${{ matrix.target }}/release
-      #   run: cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}
-      # - name: Release daily
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     prerelease: true
-      #     name: daily
-      #     tag_name: daily
-      #     target_commitish: ${{ env.full_hash }}
-      #     files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}
 
   upload-release:
     name: Upload file
@@ -272,10 +208,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: master
-
       - name: Download artifact
         uses: actions/download-artifact@v3
-
       - name: Compresse and rename
         run: |
           mkdir release daily
@@ -286,48 +220,38 @@ jobs:
                   cp "${file}" "daily/${dirname}.exe"
               else
                   tar -vcaf "release/${dirname}.tar.xz" "${file}"
-                  cp ${file} daily/${dirname}
+                  cp "${file}" "daily/${dirname}"
               fi
           done
-
-      - name: Create Release
+      - name: Create Release and Upload assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release delete  ${{ env.tag_name }}
           gh release delete  daily
-          gh release create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }}
-          gh release create daily --target ${{ env.full_hash }} --generate-notes --prerelease --title Daily
-
-#       - name: Release
-#         uses: softprops/action-gh-release@v1
-#         with:
-#           name: ${{ env.tag_name }}
-#           tag_name: ${{ env.tag_name }}
-#           target_commitish: ${{ env.full_hash }}
-#           files: release/*
-
-      - name: Release and upload assets
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload ${{ env.tag_name }} release/* --clobber
-
-#       - name: Update tag
-#         uses: jimeh/update-tags-action@v1
-#         with:
-#           tags: daily
-#           ref: ${{ env.full_hash }}
-
-#       - name: Daily
-#         uses: softprops/action-gh-release@v1
-#         with:
-#           name: Daily
-#           tag_name: daily
-#           files: daily/*
-
-      - name: Release daily and upload assets
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload daily daily/* --clobber
+          gh release create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }} release/*
+          gh release create daily --target ${{ env.full_hash }} --generate-notes --prerelease --title Daily daily/*
+      # - name: Release and upload assets
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     gh release upload ${{ env.tag_name }} release/* --clobber
+      #     gh release upload daily daily/* --clobber
+      # - name: Release
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     name: ${{ env.tag_name }}
+      #     tag_name: ${{ env.tag_name }}
+      #     target_commitish: ${{ env.full_hash }}
+      #     files: release/*
+      # - name: Update tag
+      #   uses: jimeh/update-tags-action@v1
+      #   with:
+      #     tags: daily
+      #     ref: ${{ env.full_hash }}
+      # - name: Daily
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     name: Daily
+      #     tag_name: daily
+      #     files: daily/*
