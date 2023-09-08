@@ -199,9 +199,9 @@ jobs:
     name: Upload file
     runs-on: ubuntu-latest
     if: |
-      needs.build-windows.result == 'success' ||
+      (needs.build-windows.result == 'success' ||
       needs.build-linux.result == 'success' ||
-      needs.build-android.result == 'success' &&
+      needs.build-android.result == 'success') &&
       inputs.skip_release != true
     permissions:
       contents: write
