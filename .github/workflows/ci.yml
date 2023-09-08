@@ -26,6 +26,11 @@ on:
         required: false
         default: false
         type: boolean
+      skip_release:
+        description: "Skip Release"
+        required: false
+        default: false
+        type: boolean
       reset_head:
         description: "Reset to Head"
         required: false
@@ -193,7 +198,9 @@ jobs:
   upload-release:
     name: Upload file
     runs-on: ubuntu-latest
-    if: needs.build-windows.result || needs.build-linux.result || needs.build-android.result == 'success'
+    if: |
+      needs.build-windows.result || needs.build-linux.result || needs.build-android.result == 'success' &&
+      inputs.skip_build_android != true
     permissions:
       contents: write
     needs:
