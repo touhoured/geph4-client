@@ -63,6 +63,13 @@ jobs:
           echo "full_hash=$(git log --pretty=format:%H -n 1)" >> "${GITHUB_OUTPUT}"
           echo "tag_name=$(git describe --tags)" >> "${GITHUB_OUTPUT}"
 
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }}
+          gh release create daily --target ${{ env.full_hash }} --generate-notes --prerelease --title Daily
+
   build-windows:
     name: Build Windows
     runs-on: windows-latest
@@ -266,11 +273,10 @@ jobs:
       full_hash: ${{ needs.common.outputs.full_hash }}
       tag_name: ${{ needs.common.outputs.tag_name }}
     steps:
-
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          ref: master
+      # - name: Checkout
+      #   uses: actions/checkout@v3
+      #   with:
+      #     ref: master
 
       - name: Download artifact
         uses: actions/download-artifact@v3
@@ -298,10 +304,10 @@ jobs:
 #           files: release/*
 
       - name: Release and upload assets
-        run: |
-          gh release create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }} release/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ env.tag_name }} release/* --clobber
 
 #       - name: Update tag
 #         uses: jimeh/update-tags-action@v1
@@ -317,7 +323,7 @@ jobs:
 #           files: daily/*
 
       - name: Release daily and upload assets
-        run: |
-          gh release create daily --target ${{ env.full_hash }} --generate-notes --prerelease --title Daily daily/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload daily daily/* --clobber
