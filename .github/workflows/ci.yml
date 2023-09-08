@@ -138,7 +138,7 @@ jobs:
       - name: Install Cross
         uses: taiki-e/install-action@cross
       - name: Build binary
-        if: inputs.skip_build_windows != true
+        if: inputs.skip_build_linux != true
         run: cross build --target ${{ matrix.target }} --release --locked
       - uses: actions/upload-artifact@v3
         with:
@@ -183,7 +183,7 @@ jobs:
             --tag local
           # docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
       - name: Build binary
-        if: inputs.skip_build_windows != true
+        if: inputs.skip_build_android != true
         run: cross build --target ${{ matrix.target }} --release --locked
       - uses: actions/upload-artifact@v3
         with:
