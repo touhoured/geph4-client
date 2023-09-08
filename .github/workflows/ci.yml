@@ -193,7 +193,7 @@ jobs:
   upload-release:
     name: Upload file
     runs-on: ubuntu-latest
-    if: needs.build-windows.result && needs.build-linux.result && needs.build-android.result == 'success'
+    if: needs.build-windows.result || needs.build-linux.result || needs.build-android.result == 'success'
     permissions:
       contents: write
     needs:
