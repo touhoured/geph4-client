@@ -259,11 +259,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    # needs:
-    #   - common
-    #   - build-windows
-    #   - build-linux
-    #   - build-android
+    needs:
+      - common
+      - build-windows
+      - build-linux
+      - build-android
     # env:
     #   full_hash: ${{ needs.common.outputs.full_hash }}
     #   tag_name: ${{ needs.common.outputs.tag_name }}
