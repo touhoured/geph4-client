@@ -199,9 +199,10 @@ jobs:
     name: Upload file
     runs-on: ubuntu-latest
     if: |
-      needs.build-windows.result == 'success' ||
-      needs.build-linux.result == 'success' ||
-      needs.build-android.result == 'success'
+      always()
+    #  needs.build-windows.result == 'success' ||
+    #  needs.build-linux.result == 'success' ||
+    #  needs.build-android.result == 'success'
     permissions:
       contents: write
     needs:
@@ -213,6 +214,8 @@ jobs:
       full_hash: ${{ needs.common.outputs.full_hash }}
       tag_name: ${{ needs.common.outputs.tag_name }}
     steps:
+      - name: debug
+        run: echo windows:${{ needs.build-windows.result }} linux:${{ needs.build-linux.result }} $android:${{ needs.build-android.result }}
       # - name: Checkout
       #   uses: actions/checkout@v3
       #   with:
