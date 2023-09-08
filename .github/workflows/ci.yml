@@ -67,7 +67,6 @@ jobs:
     name: Build Windows
     runs-on: windows-latest
     needs: common
-    if: inputs.skip_build_windows != true
     strategy:
       matrix:
         target:
@@ -90,6 +89,7 @@ jobs:
           rm windows-lib/*
           cp WinDivert-2.2.2-A/x64/* windows-lib/
       - name: Build binary
+        if: inputs.skip_build_windows != true
         run: cargo build --target ${{ matrix.target }} --release
       - uses: actions/upload-artifact@v3
         with:
@@ -121,7 +121,6 @@ jobs:
     name: Build Linux
     runs-on: ubuntu-latest
     needs: common
-    if: inputs.skip_build_linux != true
     strategy:
       matrix:
         target:
@@ -139,6 +138,7 @@ jobs:
       - name: Install Cross
         uses: taiki-e/install-action@cross
       - name: Build binary
+        if: inputs.skip_build_windows != true
         run: cross build --target ${{ matrix.target }} --release --locked
       - uses: actions/upload-artifact@v3
         with:
@@ -149,7 +149,6 @@ jobs:
     name: Build Android
     runs-on: ubuntu-latest
     needs: common
-    if: inputs.skip_build_android != true
     strategy:
       matrix:
         target:
@@ -184,6 +183,7 @@ jobs:
             --tag local
           # docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
       - name: Build binary
+        if: inputs.skip_build_windows != true
         run: cross build --target ${{ matrix.target }} --release --locked
       - uses: actions/upload-artifact@v3
         with:
@@ -197,8 +197,8 @@ jobs:
       contents: write
     needs:
       - common
-      # - build-windows
-      # - build-linux
+      - build-windows
+      - build-linux
       - build-android
     env:
       full_hash: ${{ needs.common.outputs.full_hash }}
