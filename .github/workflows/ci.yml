@@ -38,6 +38,8 @@ jobs:
   common:
     name: common
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       date: ${{ steps.getenv.outputs.date }}
       hash: ${{ steps.getenv.outputs.hash }}
