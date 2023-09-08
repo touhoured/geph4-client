@@ -197,17 +197,17 @@ jobs:
       contents: write
     needs:
       - common
-      - build-windows
-      - build-linux
+      # - build-windows
+      # - build-linux
       - build-android
     env:
       full_hash: ${{ needs.common.outputs.full_hash }}
       tag_name: ${{ needs.common.outputs.tag_name }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          ref: master
+      # - name: Checkout
+      #   uses: actions/checkout@v3
+      #   with:
+      #     ref: master
       - name: Download artifact
         uses: actions/download-artifact@v3
       - name: Compresse and rename
@@ -227,10 +227,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete  ${{ env.tag_name }} --cleanup-tag
-          gh release delete  daily --cleanup-tag
-          gh release create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }} release/*
-          gh release create daily --target ${{ env.full_hash }} --generate-notes --prerelease --title Daily daily/*
+          gh release -R ${{ github.repository }} delete ${{ env.tag_name }} --cleanup-tag
+          gh release -R ${{ github.repository }} delete daily --cleanup-tag
+          gh release -R ${{ github.repository }} create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }} release/*
+          gh release -R ${{ github.repository }} create daily --target ${{ env.full_hash }} --generate-notes --prerelease --title Daily daily/*
       # - name: Release and upload assets
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
