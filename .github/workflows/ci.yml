@@ -266,6 +266,12 @@ jobs:
       full_hash: ${{ needs.common.outputs.full_hash }}
       tag_name: ${{ needs.common.outputs.tag_name }}
     steps:
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: master
+
       - name: Download artifact
         uses: actions/download-artifact@v3
 
@@ -282,11 +288,6 @@ jobs:
                   cp ${file} daily/${dirname}
               fi
           done
-
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          ref: master
 
 #       - name: Release
 #         uses: softprops/action-gh-release@v1
