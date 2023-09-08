@@ -202,7 +202,7 @@ jobs:
       needs.build-windows.result == 'success' ||
       needs.build-linux.result == 'success' ||
       needs.build-android.result == 'success' &&
-      inputs.skip_build_android != true
+      inputs.skip_release != true
     permissions:
       contents: write
     needs:
