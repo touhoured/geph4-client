@@ -199,10 +199,10 @@ jobs:
     name: Upload file
     runs-on: ubuntu-latest
     if: |
-      always()
-    #  needs.build-windows.result == 'success' ||
-    #  needs.build-linux.result == 'success' ||
-    #  needs.build-android.result == 'success'
+      # always()
+      needs.build-windows.result == 'success' ||
+      needs.build-linux.result == 'success' ||
+      needs.build-android.result == 'success'
     permissions:
       contents: write
     needs:
