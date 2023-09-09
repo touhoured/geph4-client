@@ -238,10 +238,10 @@ jobs:
       - name: Create Release and Upload assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
+        # continue-on-error: true
         run: |
-          gh release -R ${{ github.repository }} delete ${{ env.tag_name }} --cleanup-tag
-          gh release -R ${{ github.repository }} delete daily --cleanup-tag
+          gh release -R ${{ github.repository }} delete ${{ env.tag_name }} --cleanup-tag 2>&1
+          gh release -R ${{ github.repository }} delete daily --cleanup-tag 2>&1
           gh release -R ${{ github.repository }} create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }} release/*
           gh release -R ${{ github.repository }} create daily --target ${{ env.full_hash }} --generate-notes --prerelease --title Daily daily/*
       # - name: Release and upload assets
