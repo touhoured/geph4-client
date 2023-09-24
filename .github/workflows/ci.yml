@@ -54,6 +54,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
+          repository: ${upstream}
           ref: master
           fetch-depth: 0
       - name: Reset to input HEAD
