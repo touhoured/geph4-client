@@ -56,7 +56,6 @@ jobs:
         with:
           repository: ${{ env.upstream }}
           ref: master
-          fetch-depth: 0
       - name: Reset to input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
@@ -218,7 +217,7 @@ jobs:
       tag_name: ${{ needs.common.outputs.tag_name }}
     steps:
       - name: debug
-        run: echo windows:${{ needs.build-windows.result }} linux:${{ needs.build-linux.result }} $android:${{ needs.build-android.result }}
+        run: echo windows:${{ needs.build-windows.result }} linux:${{ needs.build-linux.result }} android:${{ needs.build-android.result }}
       # - name: Checkout
       #   uses: actions/checkout@v3
       #   with:
@@ -238,17 +237,6 @@ jobs:
                   cp "${file}" "daily/${dirname}"
               fi
           done
-      - name: Delete Latest Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-        run: |
-          gh release -R ${{ github.repository }} delete ${{ env.tag_name }} --cleanup-tag
-      - name: Create latest release and upload assets
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release -R ${{ github.repository }} create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }} release/*
       - name: Delete daily release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -260,6 +248,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release -R ${{ github.repository }} create daily --target ${{ env.full_hash }} --generate-notes --prerelease --title Daily daily/*
+
+      - name: Delete Latest Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        run: |
+          gh release -R ${{ github.repository }} delete ${{ env.tag_name }} --cleanup-tag
+      - name: Create latest release and upload assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release -R ${{ github.repository }} create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }} release/*
       # - name: Release and upload assets
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
