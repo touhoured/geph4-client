@@ -51,7 +51,7 @@ jobs:
         with:
           repository: ${{ env.upstream }}
           ref: master
-          fetch-tags: true
+          fetch-depth: 0
       - name: Reset to input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
