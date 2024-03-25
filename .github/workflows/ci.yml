@@ -247,64 +247,64 @@ jobs:
                   cp "${file}" "daily/${dirname}"
               fi
           done
-      - name: Delete daily release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-        run: |
-          gh release -R ${{ github.repository }} delete daily --cleanup-tag 2>&1
-          gh release -R ${{ github.repository }} create daily --target ${{ env.full_hash }} --generate-notes --prerelease --title Daily daily/* 2>&1
-          gh release -R ${{ github.repository }} delete ${{ env.tag_name }} --cleanup-tag 2>&1
-          gh release -R ${{ github.repository }} create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }} release/* 2>&1
-
       # - name: Delete daily release
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       #   continue-on-error: true
       #   run: |
-      #     gh release -R ${{ github.repository }} delete daily --cleanup-tag
-      # - name: Create daily release and upload assets
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   continue-on-error: true
-      #   run: |
-      #     gh release -R ${{ github.repository }} create daily --target ${{ env.full_hash }} --generate-notes --prerelease --title Daily daily/*
+      #     gh release -R ${{ github.repository }} delete daily --cleanup-tag 2>&1
+      #     gh release -R ${{ github.repository }} create daily --target ${{ env.full_hash }} --generate-notes --prerelease --title Daily daily/* 2>&1
+      #     gh release -R ${{ github.repository }} delete ${{ env.tag_name }} --cleanup-tag 2>&1
+      #     gh release -R ${{ github.repository }} create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }} release/* 2>&1
 
-      # - name: Delete Latest Release
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   continue-on-error: true
-      #   run: |
-      #     gh release -R ${{ github.repository }} delete ${{ env.tag_name }} --cleanup-tag
-      # - name: Create latest release and upload assets
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   continue-on-error: true
-      #   run: |
-      #     gh release -R ${{ github.repository }} create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }} release/*
+      - name: Delete daily release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        run: |
+          gh release -R ${{ github.repository }} delete daily --cleanup-tag
+      - name: Create daily release and upload assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        run: |
+          gh release -R ${{ github.repository }} create daily --target ${{ env.full_hash }} --generate-notes --prerelease --title Daily daily/*
 
-      # - name: Release and upload assets
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     gh release upload ${{ env.tag_name }} release/* --clobber
-      #     gh release upload daily daily/* --clobber
+      - name: Delete Latest Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        run: |
+          gh release -R ${{ github.repository }} delete ${{ env.tag_name }} --cleanup-tag
+      - name: Create latest release and upload assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        run: |
+          gh release -R ${{ github.repository }} create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }} release/*
 
-      # - name: Release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     name: ${{ env.tag_name }}
-      #     tag_name: ${{ env.tag_name }}
-      #     target_commitish: ${{ env.full_hash }}
-      #     files: release/*
-      # - name: Update tag
-      #   uses: jimeh/update-tags-action@v1
-      #   with:
-      #     tags: daily
-      #     ref: ${{ env.full_hash }}
-      # - name: Daily
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     name: Daily
-      #     tag_name: daily
-      #     files: daily/*
+      - name: Release and upload assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ env.tag_name }} release/* --clobber
+          gh release upload daily daily/* --clobber
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ env.tag_name }}
+          tag_name: ${{ env.tag_name }}
+          target_commitish: ${{ env.full_hash }}
+          files: release/*
+      - name: Update tag
+        uses: jimeh/update-tags-action@v1
+        with:
+          tags: daily
+          ref: ${{ env.full_hash }}
+      - name: Daily
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Daily
+          tag_name: daily
+          files: daily/*
