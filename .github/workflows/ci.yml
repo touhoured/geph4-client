@@ -252,11 +252,13 @@ jobs:
         with:
           tag_name: ${{ env.tag_name }}
           files: release/*
+          generate_release_notes: true
       - name: Release daily
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: daily
           files: daily/*
+          generate_release_notes: true
       # - name: Delete daily release
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
