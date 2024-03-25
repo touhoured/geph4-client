@@ -83,13 +83,16 @@ jobs:
           - x86_64-pc-windows-msvc
     steps:
       - name: Checkout
+        if: ${{ !inputs.reset_head }}
         uses: actions/checkout@v3
         with:
           repository: ${{ env.upstream }}
-          ref: master
-      - name: Reset to input HEAD
-        if: inputs.reset_head != null
-        run: git reset --hard ${{ inputs.reset_head }}
+      - name: Checkout
+        if: ${{ inputs.reset_head }}
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.upstream }}
+          ref: ${{ inputs.reset_head }}
       - name: Use 64-bit WinDivert
         if: matrix.target == 'x86_64-pc-windows-msvc'
         shell: bash
@@ -139,13 +142,16 @@ jobs:
           - aarch64-unknown-linux-musl
     steps:
       - name: Checkout
+        if: ${{ !inputs.reset_head }}
         uses: actions/checkout@v3
         with:
           repository: ${{ env.upstream }}
-          ref: master
-      - name: Reset to input HEAD
-        if: inputs.reset_head != null
-        run: git reset --hard ${{ inputs.reset_head }}
+      - name: Checkout
+        if: ${{ inputs.reset_head }}
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.upstream }}
+          ref: ${{ inputs.reset_head }}
       - name: Install Cross
         uses: taiki-e/install-action@cross
       - name: Build binary
@@ -167,13 +173,16 @@ jobs:
           - armv7-linux-androideabi
     steps:
       - name: Checkout
+        if: ${{ !inputs.reset_head }}
         uses: actions/checkout@v3
         with:
           repository: ${{ env.upstream }}
-          ref: master
-      - name: Reset to input HEAD
-        if: inputs.reset_head != null
-        run: git reset --hard ${{ inputs.reset_head }}
+      - name: Checkout
+        if: ${{ inputs.reset_head }}
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.upstream }}
+          ref: ${{ inputs.reset_head }}
       - name: Install Cross
         uses: taiki-e/install-action@cross
       - name: Cache Docker Images
