@@ -47,14 +47,21 @@ jobs:
       tag_name: ${{ steps.getenv.outputs.tag_name }}
     steps:
       - name: Checkout
+        if: inputs.reset_head = null
         uses: actions/checkout@v3
         with:
           repository: ${{ env.upstream }}
-          ref: master
           fetch-depth: 0
-      - name: Reset to input HEAD
+      - name: Checkout
         if: inputs.reset_head != null
-        run: git reset --hard ${{ inputs.reset_head }}
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.upstream }}
+          fetch-depth: 0
+          ref: ${{ inputs.reset_head }}
+      # - name: Reset to input HEAD
+      #   if: inputs.reset_head != null
+      #   run: git reset --hard ${{ inputs.reset_head }}
       - name: Get environment variable
         id: getenv
         shell: bash
