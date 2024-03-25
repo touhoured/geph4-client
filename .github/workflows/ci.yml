@@ -247,16 +247,16 @@ jobs:
                   cp "${file}" "daily/${dirname}"
               fi
           done
-      - name: Release daily
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: daily
-          files: daily/*
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.tag_name }}
           files: release/*
+      - name: Release daily
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: daily
+          files: daily/*
       # - name: Delete daily release
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
