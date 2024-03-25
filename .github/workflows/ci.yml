@@ -47,13 +47,13 @@ jobs:
       tag_name: ${{ steps.getenv.outputs.tag_name }}
     steps:
       - name: Checkout
-        if: github.event.inputs.reset_head == ''
+        if: ${{ !inputs.reset_head }}
         uses: actions/checkout@v3
         with:
           repository: ${{ env.upstream }}
           fetch-depth: 0
       - name: Checkout
-        if: github.event.inputs.reset_head != ''
+        if: ${{ inputs.reset_head }}
         uses: actions/checkout@v3
         with:
           repository: ${{ env.upstream }}
@@ -138,7 +138,6 @@ jobs:
       matrix:
         target:
           - x86_64-unknown-linux-musl
-          - armv7-unknown-linux-musleabihf
           - aarch64-unknown-linux-musl
     steps:
       - name: Checkout
@@ -161,54 +160,54 @@ jobs:
           name: ${{ env.bin }}-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/${{ env.bin }}
 
-  build-android:
-    name: Build Android
-    runs-on: ubuntu-latest
-    if: inputs.skip_build_android != true
-    needs: common
-    strategy:
-      matrix:
-        target:
-          - aarch64-linux-android
-          - armv7-linux-androideabi
-    steps:
-      - name: Checkout
-        if: ${{ !inputs.reset_head }}
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ env.upstream }}
-      - name: Checkout
-        if: ${{ inputs.reset_head }}
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ env.upstream }}
-          ref: ${{ inputs.reset_head }}
-      - name: Install Cross
-        uses: taiki-e/install-action@cross
-      - name: Cache Docker Images
-        if: inputs.skip_cache != true
-        uses: ScribeMD/docker-cache@0.2.7
-        id: cache-docker
-        with:
-          key: cross-${{ matrix.target }}-${{ hashFiles('cross-setup.sh') }}
-      - name: Build docker
-        if: steps.cache-docker.outputs.cache-hit != 'true'
-        run: |
-          # sh cross-setup.sh
-          git clone --recursive https://github.com/cross-rs/cross.git
-          cd cross
-          cargo build-docker-image ${{ matrix.target }} \
-            --build-arg ANDROID_NDK=r25b \
-            --build-arg ANDROID_SDK=21 \
-            --build-arg ANDROID_VERSION=5.0.0_r1 \
-            --tag local
-          # docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
-      - name: Build binary
-        run: cross build --target ${{ matrix.target }} --release --locked
-      - uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.bin }}-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/${{ env.bin }}
+  # build-android:
+  #   name: Build Android
+  #   runs-on: ubuntu-latest
+  #   if: inputs.skip_build_android != true
+  #   needs: common
+  #   strategy:
+  #     matrix:
+  #       target:
+  #         - aarch64-linux-android
+  #         - armv7-linux-androideabi
+  #   steps:
+  #     - name: Checkout
+  #       if: ${{ !inputs.reset_head }}
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: ${{ env.upstream }}
+  #     - name: Checkout
+  #       if: ${{ inputs.reset_head }}
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: ${{ env.upstream }}
+  #         ref: ${{ inputs.reset_head }}
+  #     - name: Install Cross
+  #       uses: taiki-e/install-action@cross
+  #     - name: Cache Docker Images
+  #       if: inputs.skip_cache != true
+  #       uses: ScribeMD/docker-cache@0.2.7
+  #       id: cache-docker
+  #       with:
+  #         key: cross-${{ matrix.target }}-${{ hashFiles('cross-setup.sh') }}
+  #     - name: Build docker
+  #       if: steps.cache-docker.outputs.cache-hit != 'true'
+  #       run: |
+  #         # sh cross-setup.sh
+  #         git clone --recursive https://github.com/cross-rs/cross.git
+  #         cd cross
+  #         cargo build-docker-image ${{ matrix.target }} \
+  #           --build-arg ANDROID_NDK=r25b \
+  #           --build-arg ANDROID_SDK=21 \
+  #           --build-arg ANDROID_VERSION=5.0.0_r1 \
+  #           --tag local
+  #         # docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
+  #     - name: Build binary
+  #       run: cross build --target ${{ matrix.target }} --release --locked
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: ${{ env.bin }}-${{ matrix.target }}
+  #         path: target/${{ matrix.target }}/release/${{ env.bin }}
 
   upload-release:
     name: Upload file
@@ -222,7 +221,7 @@ jobs:
       - common
       - build-windows
       - build-linux
-      - build-android
+      # - build-android
     env:
       full_hash: ${{ needs.common.outputs.full_hash }}
       tag_name: ${{ needs.common.outputs.tag_name }}
