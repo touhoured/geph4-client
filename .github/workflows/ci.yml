@@ -38,8 +38,8 @@ jobs:
   common:
     name: common
     runs-on: ubuntu-latest
-    # permissions:
-    #   contents: write
+    permissions:
+      contents: write
     outputs:
       date: ${{ steps.getenv.outputs.date }}
       hash: ${{ steps.getenv.outputs.hash }}
@@ -70,16 +70,24 @@ jobs:
           echo "hash=$(git log --pretty=format:%h -n 1)" >> "${GITHUB_OUTPUT}"
           echo "full_hash=$(git log --pretty=format:%H -n 1)" >> "${GITHUB_OUTPUT}"
           echo "tag_name=$(git describe --tags)" >> "${GITHUB_OUTPUT}"
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        run: |
+          gh release -R ${{ github.repository }} create ${{ env.tag_name }} --generate-notes 2>&1
 
   build-windows:
     name: Build Windows
     runs-on: windows-latest
+    permissions:
+      contents: write
     if: inputs.skip_build_windows != true
     needs: common
     strategy:
       matrix:
         target:
-          - i686-pc-windows-msvc
+          # - i686-pc-windows-msvc
           - x86_64-pc-windows-msvc
     steps:
       - name: Checkout
@@ -93,45 +101,41 @@ jobs:
         with:
           repository: ${{ env.upstream }}
           ref: ${{ inputs.reset_head }}
-      - name: Use 64-bit WinDivert
-        if: matrix.target == 'x86_64-pc-windows-msvc'
-        shell: bash
-        run: |
-          curl -OL https://github.com/basil00/Divert/releases/download/v2.2.2/WinDivert-2.2.2-A.zip
-          unzip WinDivert-2.2.2-A.zip
-          rm windows-lib/*
-          cp WinDivert-2.2.2-A/x64/* windows-lib/
+      # - name: Use 64-bit WinDivert
+      #   if: matrix.target == 'x86_64-pc-windows-msvc'
+      #   shell: bash
+      #   run: |
+      #     curl -OL https://github.com/basil00/Divert/releases/download/v2.2.2/WinDivert-2.2.2-A.zip
+      #     unzip WinDivert-2.2.2-A.zip
+      #     rm windows-lib/*
+      #     cp WinDivert-2.2.2-A/x64/* windows-lib/
       - name: Build binary
         run: cargo build --target ${{ matrix.target }} --release
+      - name: Rename
+        shell: bash
+        run: |
+          mkdir build
+          cp target/${{ matrix.target }}/release/${{ env.bin }}.exe build
+          cd build
+          cp ${{ env.bin }}.exe ${{ env.bin }}-${{ matrix.target }}.exe
+          7z a ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.zip ${{ env.bin }}.exe
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.bin }}-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/${{ env.bin }}.exe
-      # - name: Compression
-      #   working-directory: target/${{ matrix.target }}/release
-      #   run: 7z a ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.7z ${{ env.bin }}
-      # - name: Release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     name: ${{ env.tag_name }}
-      #     tag_name: ${{ env.tag_name }}
-      #     target_commitish: ${{ env.full_hash }}
-      #     files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.7z
-      # - name: Naming
-      #   working-directory: target/${{ matrix.target }}/release
-      #   run: cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}.exe
-      # - name: Release daily
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     prerelease: true
-      #     name: daily
-      #     tag_name: daily
-      #     target_commitish: ${{ env.full_hash }}
-      #     files: target/${{ matrix.target }}/release/${{ env.bin }}-${{ matrix.target }}.exe
+          path: build/${{ env.bin }}.exe
+      - name: Release
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release -R ${{ github.repository }} upload ${{ env.tag_name }} --clobber build/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.zip
+          gh release -R ${{ github.repository }} upload daily --clobber build/${{ env.bin }}-${{ matrix.target }}.exe
 
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     if: inputs.skip_build_linux != true
     needs: common
     strategy:
@@ -155,83 +159,42 @@ jobs:
         uses: taiki-e/install-action@cross
       - name: Build binary
         run: cross build --target ${{ matrix.target }} --release --locked
+      - name: Rename
+        run: |
+          mkdir build
+          cp target/${{ matrix.target }}/release/${{ env.bin }} build
+          cd build
+          cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}
+          tar -xvaf ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.gz ${{ env.bin }}
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.bin }}-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/${{ env.bin }}
-
-  # build-android:
-  #   name: Build Android
-  #   runs-on: ubuntu-latest
-  #   if: inputs.skip_build_android != true
-  #   needs: common
-  #   strategy:
-  #     matrix:
-  #       target:
-  #         - aarch64-linux-android
-  #         - armv7-linux-androideabi
-  #   steps:
-  #     - name: Checkout
-  #       if: ${{ !inputs.reset_head }}
-  #       uses: actions/checkout@v3
-  #       with:
-  #         repository: ${{ env.upstream }}
-  #     - name: Checkout
-  #       if: ${{ inputs.reset_head }}
-  #       uses: actions/checkout@v3
-  #       with:
-  #         repository: ${{ env.upstream }}
-  #         ref: ${{ inputs.reset_head }}
-  #     - name: Install Cross
-  #       uses: taiki-e/install-action@cross
-  #     - name: Cache Docker Images
-  #       if: inputs.skip_cache != true
-  #       uses: ScribeMD/docker-cache@0.2.7
-  #       id: cache-docker
-  #       with:
-  #         key: cross-${{ matrix.target }}-${{ hashFiles('cross-setup.sh') }}
-  #     - name: Build docker
-  #       if: steps.cache-docker.outputs.cache-hit != 'true'
-  #       run: |
-  #         # sh cross-setup.sh
-  #         git clone --recursive https://github.com/cross-rs/cross.git
-  #         cd cross
-  #         cargo build-docker-image ${{ matrix.target }} \
-  #           --build-arg ANDROID_NDK=r25b \
-  #           --build-arg ANDROID_SDK=21 \
-  #           --build-arg ANDROID_VERSION=5.0.0_r1 \
-  #           --tag local
-  #         # docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
-  #     - name: Build binary
-  #       run: cross build --target ${{ matrix.target }} --release --locked
-  #     - uses: actions/upload-artifact@v3
-  #       with:
-  #         name: ${{ env.bin }}-${{ matrix.target }}
-  #         path: target/${{ matrix.target }}/release/${{ env.bin }}
+          path: build/${{ env.bin }}
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release -R ${{ github.repository }} upload ${{ env.tag_name }} --clobber build/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.gz
+          gh release -R ${{ github.repository }} upload daily --clobber build/${{ env.bin }}-${{ matrix.target }}
 
   upload-release:
     name: Upload file
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: false
     # if: |
     #   needs.build-windows.result == 'success' ||
     #   needs.build-linux.result == 'success' ||
     #   # needs.build-android.result == 'success'
-    permissions: write-all
     needs:
       - common
       - build-windows
       - build-linux
-      # - build-android
     env:
       full_hash: ${{ needs.common.outputs.full_hash }}
       tag_name: ${{ needs.common.outputs.tag_name }}
     steps:
-      - name: debug
-        run: echo windows:${{ needs.build-windows.result }} linux:${{ needs.build-linux.result }} android:${{ needs.build-android.result }}
-      # - name: Checkout
-      #   uses: actions/checkout@v3
-      #   with:
-      #     ref: master
       - name: Download artifact
         uses: actions/download-artifact@v3
       - name: Compresse and rename
@@ -245,27 +208,3 @@ jobs:
                   tar -vcaf "release/${dirname}.tar.gz" "${file}"
               fi
           done
-      # - name: Release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     tag_name: ${{ env.tag_name }}
-      #     files: release/*
-      #     generate_release_notes: true
-      #     target_commitish: ${{ env.full_hash }}
-      # - name: Release daily
-      #   uses: softprops/action-gh-release@v2
-      #   with:
-      #     tag_name: daily
-      #     files: daily/*
-      #     generate_release_notes: true
-      #     target_commitish: ${{ env.full_hash }}
-      - name: Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # continue-on-error: true
-        run: |
-          gh release -R ${{ github.repository }} create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }} release/* 2>&1
-          
-
-
-          
