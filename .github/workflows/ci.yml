@@ -95,12 +95,14 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: ${{ env.upstream }}
+          fetch-tags: true
       - name: Checkout
         if: ${{ inputs.reset_head }}
         uses: actions/checkout@v3
         with:
           repository: ${{ env.upstream }}
           ref: ${{ inputs.reset_head }}
+          fetch-tags: true
       # - name: Use 64-bit WinDivert
       #   if: matrix.target == 'x86_64-pc-windows-msvc'
       #   shell: bash
