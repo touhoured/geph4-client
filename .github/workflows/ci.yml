@@ -79,7 +79,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
         run: |
-          gh release -R ${{ github.repository }} create ${{ env.tag_name }} --generate-notes 2>&1
+          gh release -R ${{ github.repository }} create $(git describe --tags) --generate-notes 2>&1
 
   build-windows:
     name: Build Windows
