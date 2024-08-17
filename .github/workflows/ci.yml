@@ -236,37 +236,36 @@ jobs:
         uses: actions/download-artifact@v3
       - name: Compresse and rename
         run: |
-          mkdir release daily
+          mkdir release
           for file in ${{ env.bin }}*/*; do
               dirname=$(dirname "${file}")
               if [[ "${file}" == *"windows"* ]]; then
-                  7z a "release/${dirname}.7z" "${file}"
-                  cp "${file}" "daily/${dirname}.exe"
+                  7z a "release/${dirname}.zip" "${file}"
               else
-                  tar -vcaf "release/${dirname}.tar.xz" "${file}"
-                  cp "${file}" "daily/${dirname}"
+                  tar -vcaf "release/${dirname}.tar.gz" "${file}"
               fi
           done
+      # - name: Release
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     tag_name: ${{ env.tag_name }}
+      #     files: release/*
+      #     generate_release_notes: true
+      #     target_commitish: ${{ env.full_hash }}
+      # - name: Release daily
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     tag_name: daily
+      #     files: daily/*
+      #     generate_release_notes: true
+      #     target_commitish: ${{ env.full_hash }}
       - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ env.tag_name }}
-          files: release/*
-          generate_release_notes: true
-          target_commitish: ${{ env.full_hash }}
-      - name: Release daily
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: daily
-          files: daily/*
-          generate_release_notes: true
-          target_commitish: ${{ env.full_hash }}
-      # - name: Delete daily release
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   continue-on-error: true
-      #   run: |
-      #     gh release -R ${{ github.repository }} delete daily --cleanup-tag 2>&1
-      #     gh release -R ${{ github.repository }} create daily --target ${{ env.full_hash }} --generate-notes --prerelease --title Daily daily/* 2>&1
-      #     gh release -R ${{ github.repository }} delete ${{ env.tag_name }} --cleanup-tag 2>&1
-      #     gh release -R ${{ github.repository }} create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }} release/* 2>&1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        run: |
+          gh release -R ${{ github.repository }} create ${{ env.tag_name }} --target ${{ env.full_hash }} --generate-notes --latest --title ${{ env.tag_name }} release/* 2>&1
+          
+
+
+          
