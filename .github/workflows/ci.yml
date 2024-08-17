@@ -70,6 +70,10 @@ jobs:
           echo "hash=$(git log --pretty=format:%h -n 1)" >> "${GITHUB_OUTPUT}"
           echo "full_hash=$(git log --pretty=format:%H -n 1)" >> "${GITHUB_OUTPUT}"
           echo "tag_name=$(git describe --tags)" >> "${GITHUB_OUTPUT}"
+          echo "date=$(date -I)"
+          echo "hash=$(git log --pretty=format:%h -n 1)"
+          echo "full_hash=$(git log --pretty=format:%H -n 1)"
+          echo "tag_name=$(git describe --tags)"
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
