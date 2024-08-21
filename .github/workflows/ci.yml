@@ -177,7 +177,7 @@ jobs:
           cp target/${{ matrix.target }}/release/${{ env.bin }} build
           cd build
           cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}
-          tar -xvaf ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.gz ${{ env.bin }}
+          tar -cvaf ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.gz ${{ env.bin }}
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.bin }}-${{ matrix.target }}
