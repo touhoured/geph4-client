@@ -207,8 +207,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: master
-          fetch-depth: 0
+          repository: ${{ env.upstream }}
       - name: Reset to input HEAD
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
@@ -220,7 +219,7 @@ jobs:
         #   profile: minimal
         #   default: true
       - name: Add Android targets
-        run: rustup target install ${{ matrix.target }}
+        run: rustup target add ${{ matrix.target }}
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
         with:
