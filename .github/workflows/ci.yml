@@ -220,7 +220,7 @@ jobs:
         #   profile: minimal
         #   default: true
       - name: Add Android targets
-        run: rustup target add ${{ matrix.target }}
+        run: rustup target install ${{ matrix.target }}
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
         with:
