@@ -194,6 +194,11 @@ jobs:
   build-android:
     name: Build Android
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      full_hash: ${{ needs.common.outputs.full_hash }}
+      tag_name: ${{ needs.common.outputs.tag_name }}
     if: inputs.skip_build_android != true
     needs: common
     strategy:
