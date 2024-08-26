@@ -16,11 +16,11 @@ on:
         required: false
         default: false
         type: boolean
-      # skip_build_android:
-      #   description: "Skip Build Android"
-      #   required: false
-      #   default: false
-      #   type: boolean
+      skip_build_android:
+        description: "Skip Build Android"
+        required: false
+        default: false
+        type: boolean
       skip_release:
         description: "Skip Release"
         required: false
@@ -190,6 +190,67 @@ jobs:
         run: |
           gh release -R ${{ github.repository }} upload ${{ env.tag_name }} --clobber build/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.gz
           gh release -R ${{ github.repository }} upload daily --clobber build/${{ env.bin }}-${{ matrix.target }}
+
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    if: inputs.skip_build_android != true
+    needs: common
+    strategy:
+      matrix:
+        target:
+          - aarch64-linux-android
+          - armv7-linux-androideabi
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: master
+      - name: Reset to input HEAD
+        if: inputs.reset_head != null
+        run: git reset --hard ${{ inputs.reset_head }}
+      - name: Install Cross
+        uses: taiki-e/install-action@cross
+      - name: Cache Docker Images
+        if: inputs.skip_cache != true
+        uses: ScribeMD/docker-cache@0.2.7
+        id: cache-docker
+        with:
+          key: cross-${{ matrix.target }}-${{ hashFiles('cross-setup.sh') }}
+      - name: Build docker
+        if: steps.cache-docker.outputs.cache-hit != 'true'
+        run: |
+          # sh cross-setup.sh
+          git clone --recursive https://github.com/cross-rs/cross.git
+          cd cross
+          cargo build-docker-image ${{ matrix.target }} \
+            --build-arg ANDROID_NDK=r25b \
+            --build-arg ANDROID_SDK=21 \
+            --build-arg ANDROID_VERSION=5.0.0_r1 \
+            --tag local
+          # docker tag ghcr.io/cross-rs/${{ matrix.target }}:build ghcr.io/cross-rs/${{ matrix.target }}:local
+      - name: Build binary
+        run: cross build --target ${{ matrix.target }} --release --locked
+      - name: Rename
+        run: |
+          mkdir build
+          cp target/${{ matrix.target }}/release/${{ env.bin }} build
+          cd build
+          cp ${{ env.bin }} ${{ env.bin }}-${{ matrix.target }}
+          tar -cvaf ${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.gz ${{ env.bin }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.bin }}-${{ matrix.target }}
+          path: build/${{ env.bin }}
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release -R ${{ github.repository }} upload ${{ env.tag_name }} --clobber build/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.gz
+          gh release -R ${{ github.repository }} upload daily --clobber build/${{ env.bin }}-${{ matrix.target }}
+
+
+
 
   upload-release:
     name: Upload file
