@@ -198,9 +198,11 @@ jobs:
     needs: common
     strategy:
       matrix:
-        target:
-          - aarch64-linux-android
-          - armv7-linux-androideabi
+        include:
+          - target: aarch64-linux-android
+            abi: arm64-v8a
+          - target: armv7-linux-androideabi
+            abi: armeabi-v7a
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -211,27 +213,23 @@ jobs:
         if: inputs.reset_head != null
         run: git reset --hard ${{ inputs.reset_head }}
       - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          default: true
+        uses: taiki-e/install-action@cargo-minimal-versions
+        # uses: actions-rs/toolchain@v1
+        # with:
+        #   toolchain: stable
+        #   profile: minimal
+        #   default: true
       - name: Add Android targets
-        run: |
-          rustup target add armv7-linux-androideabi
-          rustup target add aarch64-linux-android
+        run: rustup target add ${{ matrix.target }}
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r25b
       - name: Install cargo-ndk
         run: cargo install cargo-ndk
-      - name: Build for armv7-linux-androideabi
+      - name: Build for ${{ matrix.target }}
         run: |
-          cargo ndk -t armeabi-v7a -p 21 build --release
-      - name: Build for aarch64-linux-android
-        run: |
-          cargo ndk -t arm64-v8a -p 21 build --release
+          cargo ndk -t ${{ matrix.abi }} -p 21 build --release
       - name: Rename
         run: |
           mkdir build
@@ -250,35 +248,3 @@ jobs:
           gh release -R ${{ github.repository }} upload ${{ env.tag_name }} --clobber build/${{ env.bin }}-${{ matrix.target }}-${{ env.tag_name }}.tar.gz
           gh release -R ${{ github.repository }} upload daily --clobber build/${{ env.bin }}-${{ matrix.target }}
 
-
-  upload-release:
-    name: Upload file
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    if: false
-    # if: |
-    #   needs.build-windows.result == 'success' ||
-    #   needs.build-linux.result == 'success' ||
-    #   # needs.build-android.result == 'success'
-    needs:
-      - common
-      - build-windows
-      - build-linux
-    env:
-      full_hash: ${{ needs.common.outputs.full_hash }}
-      tag_name: ${{ needs.common.outputs.tag_name }}
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v3
-      - name: Compresse and rename
-        run: |
-          mkdir release
-          for file in ${{ env.bin }}*/*; do
-              dirname=$(dirname "${file}")
-              if [[ "${file}" == *"windows"* ]]; then
-                  7z a "release/${dirname}.zip" "${file}"
-              else
-                  tar -vcaf "release/${dirname}.tar.gz" "${file}"
-              fi
-          done
